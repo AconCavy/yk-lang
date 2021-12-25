@@ -2,7 +2,6 @@
 
 public enum TokenType
 {
-    // Single characters
     LeftParen,
     RightParen,
     LeftBrace,
@@ -14,8 +13,8 @@ public enum TokenType
     Star,
     Slash,
     Semicolon,
+    Hash,
 
-    // Single or Double characters
     Bang,
     BangEqual,
     Assign,
@@ -25,14 +24,15 @@ public enum TokenType
     Less,
     LessEqual,
 
-    // Literal
     Identifier,
     String,
     Number,
 
-    // Keywords
     And,
     Or,
+    BitwiseAnd,
+    BitwiseOr,
+
     Class,
     If,
     Else,
@@ -45,6 +45,6 @@ public enum TokenType
     Var,
     Function,
 
-    // Special
-    Eof
+    Eof,
+    Other
 }
