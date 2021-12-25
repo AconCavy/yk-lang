@@ -4,6 +4,11 @@ public static class Lexer
 {
     private static readonly IReadOnlySet<char> s_ignoreCharacters = new HashSet<char> { ' ', '\t', '\r', '\n' };
 
+    private static readonly IReadOnlySet<char> s_separator = new HashSet<char>
+    {
+        '(', ')', '{', '}', ',', '.', '+', '-', '*', '/', '!', '=', '<', '>', '&', '|', ' ', '\t', '\r', '\n'
+    };
+
     private static readonly IReadOnlyDictionary<string, TokenType> s_keywords = new Dictionary<string, TokenType>
     {
         { "class", TokenType.Class },
@@ -135,10 +140,9 @@ public static class Lexer
 
     public static int OtherLength(ReadOnlySpan<char> source)
     {
-        ReadOnlySpan<char> end = "(){},.+-*/!=<>&| \t\r\n";
         for (var i = 0; i < source.Length; i++)
         {
-            if (end.Contains(source[i]))
+            if (s_separator.Contains(source[i]))
                 return i;
         }
 
