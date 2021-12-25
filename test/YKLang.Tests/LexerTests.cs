@@ -24,7 +24,7 @@ public class LexerTests
             new(TokenType.Semicolon, 10..11),
         };
 
-        var actual = Lexer.GenerateTokens(Source);
+        var actual = Lexer.Analyze(Source);
         Assert.Equal(expected, actual);
     }
 
@@ -40,7 +40,7 @@ public class LexerTests
             new(TokenType.Hash, 14..26),
         };
 
-        var actual = Lexer.GenerateTokens(Source);
+        var actual = Lexer.Analyze(Source);
         Assert.Equal(expected, actual);
     }
 
@@ -64,7 +64,7 @@ public class LexerTests
             new(TokenType.Or, 27..29),
         };
 
-        var actual = Lexer.GenerateTokens(Source);
+        var actual = Lexer.Analyze(Source);
         Assert.Equal(expected, actual);
     }
 
@@ -79,7 +79,7 @@ public class LexerTests
             new(TokenType.RightBrace, 17..18),
         };
 
-        var actual = Lexer.GenerateTokens(Source);
+        var actual = Lexer.Analyze(Source);
         Assert.Equal(expected, actual);
     }
 
@@ -95,7 +95,7 @@ public class LexerTests
             new(TokenType.RightBrace, 5..6),
         };
 
-        var actual = Lexer.GenerateTokens(Source);
+        var actual = Lexer.Analyze(Source);
         Assert.Equal(expected, actual);
     }
 
@@ -109,7 +109,7 @@ public class LexerTests
             new(TokenType.Identifier, 6..9),
         };
 
-        var actual = Lexer.GenerateTokens(Source);
+        var actual = Lexer.Analyze(Source);
         Assert.Equal(expected, actual);
     }
 
@@ -125,7 +125,7 @@ public class LexerTests
             new(TokenType.Number, 8..11),
         };
 
-        var actual = Lexer.GenerateTokens(Source);
+        var actual = Lexer.Analyze(Source);
         Assert.Equal(expected, actual);
     }
 

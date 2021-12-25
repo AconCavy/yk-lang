@@ -24,7 +24,7 @@ public static class Lexer
         { "function", TokenType.Function }
     };
 
-    public static IEnumerable<Token> GenerateTokens(ReadOnlySpan<char> source)
+    public static ICollection<Token> Analyze(ReadOnlySpan<char> source)
     {
         var current = 0;
         var tokens = new List<Token>();
