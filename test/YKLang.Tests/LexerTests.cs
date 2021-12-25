@@ -130,8 +130,11 @@ public class LexerTests
     }
 
     [Theory]
-    [InlineData("HelloWorld", "Hello", true)]
-    [InlineData("HelloWorld", "World", false)]
+    [InlineData("Hello", "Hello", true)]
+    [InlineData("Hello World", "Hello", true)]
+    [InlineData("Hello+", "Hello", true)]
+    [InlineData("HelloWorld", "Hello", false)]
+    [InlineData("Hello World", "World", false)]
     [InlineData("Hell", "Hello", false)]
     public void IsMatchTest(string source, string target, bool expected)
     {

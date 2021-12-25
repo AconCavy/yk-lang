@@ -88,7 +88,9 @@ public static class Lexer
 
     public static bool IsMatch(ReadOnlySpan<char> source, ReadOnlySpan<char> target)
     {
-        return target.Length <= source.Length && source[..target.Length].SequenceEqual(target);
+        if (!source.StartsWith(target))
+            return false;
+        return source.Length == target.Length || s_separator.Contains(source[target.Length]);
     }
 
     public static int CommentLength(ReadOnlySpan<char> source)
