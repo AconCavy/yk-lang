@@ -1,3 +1,3 @@
 ﻿namespace YKLang;
 
-public record Token(TokenType Type, string Literal);
+public readonly record struct Token(TokenType Type, Range Range);

@@ -11,17 +11,17 @@ public class LexerTests
         const string Source = "(){},.+-*/;";
         var expected = new List<Token>
         {
-            new(TokenType.LeftParen, "("),
-            new(TokenType.RightParen, ")"),
-            new(TokenType.LeftBrace, "{"),
-            new(TokenType.RightBrace, "}"),
-            new(TokenType.Comma, ","),
-            new(TokenType.Dot, "."),
-            new(TokenType.Plus, "+"),
-            new(TokenType.Minus, "-"),
-            new(TokenType.Star, "*"),
-            new(TokenType.Slash, "/"),
-            new(TokenType.Semicolon, ";"),
+            new(TokenType.LeftParen, 0..1),
+            new(TokenType.RightParen, 1..2),
+            new(TokenType.LeftBrace, 2..3),
+            new(TokenType.RightBrace, 3..4),
+            new(TokenType.Comma, 4..5),
+            new(TokenType.Dot, 5..6),
+            new(TokenType.Plus, 6..7),
+            new(TokenType.Minus, 7..8),
+            new(TokenType.Star, 8..9),
+            new(TokenType.Slash, 9..10),
+            new(TokenType.Semicolon, 10..11),
         };
 
         var actual = Lexer.GenerateTokens(Source);
@@ -34,10 +34,10 @@ public class LexerTests
         const string Source = "# Comment 1\n{}# Comment 2\n";
         var expected = new List<Token>
         {
-            new(TokenType.Hash, "# Comment 1\n"),
-            new(TokenType.LeftBrace, "{"),
-            new(TokenType.RightBrace, "}"),
-            new(TokenType.Hash, "# Comment 2\n"),
+            new(TokenType.Hash, 0..12),
+            new(TokenType.LeftBrace, 12..13),
+            new(TokenType.RightBrace, 13..14),
+            new(TokenType.Hash, 14..26),
         };
 
         var actual = Lexer.GenerateTokens(Source);
@@ -47,17 +47,21 @@ public class LexerTests
     [Fact]
     public void DoubleCharactersTokensTest()
     {
-        const string Source = "! != = == < <= > >=";
+        const string Source = "! != = == < <= > >= & && | ||";
         var expected = new List<Token>
         {
-            new(TokenType.Bang, "!"),
-            new(TokenType.BangEqual, "!="),
-            new(TokenType.Assign, "="),
-            new(TokenType.Equal, "=="),
-            new(TokenType.Less, "<"),
-            new(TokenType.LessEqual, "<="),
-            new(TokenType.Greater, ">"),
-            new(TokenType.GreaterEqual, ">="),
+            new(TokenType.Bang, 0..1),
+            new(TokenType.BangEqual, 2..4),
+            new(TokenType.Assign, 5..6),
+            new(TokenType.Equal, 7..9),
+            new(TokenType.Less, 10..11),
+            new(TokenType.LessEqual, 12..14),
+            new(TokenType.Greater, 15..16),
+            new(TokenType.GreaterEqual, 17..19),
+            new(TokenType.BitwiseAnd, 20..21),
+            new(TokenType.And, 22..24),
+            new(TokenType.BitwiseOr, 25..26),
+            new(TokenType.Or, 27..29),
         };
 
         var actual = Lexer.GenerateTokens(Source);
@@ -70,9 +74,9 @@ public class LexerTests
         const string Source = "{\"This is String\"}";
         var expected = new List<Token>
         {
-            new(TokenType.LeftBrace, "{"),
-            new(TokenType.String, "This is String"),
-            new(TokenType.RightBrace, "}"),
+            new(TokenType.LeftBrace, 0..1),
+            new(TokenType.String, 2..16),
+            new(TokenType.RightBrace, 17..18),
         };
 
         var actual = Lexer.GenerateTokens(Source);
@@ -85,10 +89,10 @@ public class LexerTests
         const string Source = "{0.5.}";
         var expected = new List<Token>
         {
-            new(TokenType.LeftBrace, "{"),
-            new(TokenType.Number, "0.5"),
-            new(TokenType.Dot, "."),
-            new(TokenType.RightBrace, "}"),
+            new(TokenType.LeftBrace, 0..1),
+            new(TokenType.Number, 1..4),
+            new(TokenType.Dot, 4..5),
+            new(TokenType.RightBrace, 5..6),
         };
 
         var actual = Lexer.GenerateTokens(Source);
@@ -101,8 +105,8 @@ public class LexerTests
         const string Source = "class foo";
         var expected = new List<Token>
         {
-            new(TokenType.Class, "class"),
-            new(TokenType.Identifier, "foo"),
+            new(TokenType.Class, 0..5),
+            new(TokenType.Identifier, 6..9),
         };
 
         var actual = Lexer.GenerateTokens(Source);
@@ -115,10 +119,10 @@ public class LexerTests
         const string Source = "var x = 1.0";
         var expected = new List<Token>
         {
-            new(TokenType.Var, "var"),
-            new(TokenType.Identifier, "x"),
-            new(TokenType.Assign, "="),
-            new(TokenType.Number, "1.0"),
+            new(TokenType.Var, 0..3),
+            new(TokenType.Identifier, 4..5),
+            new(TokenType.Assign, 6..7),
+            new(TokenType.Number, 8..11),
         };
 
         var actual = Lexer.GenerateTokens(Source);
@@ -149,6 +153,7 @@ public class LexerTests
     [InlineData("\"\"", 2)]
     [InlineData("\"String\"", 8)]
     [InlineData("\"A\nB\"", 5)]
+    [InlineData("\"A", -1)]
     public void StringLengthTest(string source, int expected)
     {
         var actual = Lexer.StringLength(source);
@@ -160,6 +165,7 @@ public class LexerTests
     [InlineData("1000", 4)]
     [InlineData("0.5", 3)]
     [InlineData("5.5.5", -1)]
+    [InlineData("5 ", 1)]
     public void NumberLengthTest(string source, int expected)
     {
         var actual = Lexer.NumberLength(source);

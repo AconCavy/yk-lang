@@ -2,56 +2,52 @@
 
 public static class Lexer
 {
-    public static IEnumerable<Token> GenerateTokens(string source)
+    private static readonly IReadOnlySet<char> s_ignoreCharacters = new HashSet<char> { ' ', '\t', '\r', '\n' };
+
+    private static readonly IReadOnlyDictionary<string, TokenType> s_keywords = new Dictionary<string, TokenType>
+    {
+        { "class", TokenType.Class },
+        { "if", TokenType.If },
+        { "else", TokenType.Else },
+        { "while", TokenType.While },
+        { "for", TokenType.For },
+        { "nil", TokenType.Nil },
+        { "return", TokenType.Return },
+        { "this", TokenType.This },
+        { "base", TokenType.Base },
+        { "var", TokenType.Var },
+        { "function", TokenType.Function }
+    };
+
+    public static IEnumerable<Token> GenerateTokens(ReadOnlySpan<char> source)
     {
         var current = 0;
         var tokens = new List<Token>();
-        ReadOnlySpan<char> ignoreCharacters = stackalloc char[] { ' ', '\t', '\r', '\n' };
-        var keywords = new Dictionary<string, TokenType>
-        {
-            { "class", TokenType.Class },
-            { "if", TokenType.If },
-            { "else", TokenType.Else },
-            { "while", TokenType.While },
-            { "for", TokenType.For },
-            { "nil", TokenType.Nil },
-            { "return", TokenType.Return },
-            { "this", TokenType.This },
-            { "base", TokenType.Base },
-            { "var", TokenType.Var },
-            { "function", TokenType.Function }
-        };
 
         while (current < source.Length)
         {
-            if (ignoreCharacters.Contains(source[current]))
+            if (s_ignoreCharacters.Contains(source[current]))
             {
                 current++;
                 continue;
             }
 
-            var (type, length) = GetTypeAndLength(source.AsSpan(current));
+            var (type, length) = GetTypeAndLength(source[current..]);
             if (length < 0)
-            {
                 throw new InvalidOperationException();
-            }
 
-            var start = current;
-            current += length;
+            var range = type is TokenType.String
+                ? new Range(current + 1, current + length - 1)
+                : new Range(current, current + length);
 
-            if (type is TokenType.String)
-            {
-                start++;
-                length -= 2;
-            }
-
-            var literal = source.AsSpan(start, length).ToString();
             if (type is TokenType.Other)
             {
-                type = keywords.ContainsKey(literal) ? keywords[literal] : TokenType.Identifier;
+                var literal = source.Slice(current, length).ToString();
+                type = s_keywords.ContainsKey(literal) ? s_keywords[literal] : TokenType.Identifier;
             }
 
-            tokens.Add(new Token(type, literal));
+            tokens.Add(new Token(type, range));
+            current += length;
         }
 
         return tokens;
@@ -95,9 +91,7 @@ public static class Lexer
         for (var i = 0; i < source.Length; i++)
         {
             if (source[i] == '\n')
-            {
                 return i + 1;
-            }
         }
 
         return source.Length;
@@ -108,9 +102,7 @@ public static class Lexer
         for (var i = 1; i < source.Length; i++)
         {
             if (source[i] == '"')
-            {
                 return i + 1;
-            }
         }
 
         return -1;
