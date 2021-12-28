@@ -9,21 +9,6 @@ public static class Lexer
         '(', ')', '{', '}', ',', '.', '+', '-', '*', '/', '!', '=', '<', '>', '&', '|', ' ', '\t', '\r', '\n'
     };
 
-    private static readonly IReadOnlyDictionary<string, TokenType> s_keywords = new Dictionary<string, TokenType>
-    {
-        { "class", TokenType.Class },
-        { "if", TokenType.If },
-        { "else", TokenType.Else },
-        { "while", TokenType.While },
-        { "for", TokenType.For },
-        { "nil", TokenType.Nil },
-        { "return", TokenType.Return },
-        { "this", TokenType.This },
-        { "base", TokenType.Base },
-        { "var", TokenType.Var },
-        { "function", TokenType.Function }
-    };
-
     public static ICollection<Token> Analyze(ReadOnlySpan<char> source)
     {
         var current = 0;
@@ -47,8 +32,7 @@ public static class Lexer
 
             if (type is TokenType.Other)
             {
-                var literal = source.Slice(current, length).ToString();
-                type = s_keywords.ContainsKey(literal) ? s_keywords[literal] : TokenType.Identifier;
+                type = SelectKeywordType(source.Slice(current, length));
             }
 
             tokens.Add(new Token(type, range));
@@ -74,14 +58,14 @@ public static class Lexer
             '/' => (TokenType.Slash, 1),
             ';' => (TokenType.Semicolon, 1),
             '#' => (TokenType.Hash, CommentLength(source)),
-            '!' => IsMatch(source, "!=") ? (TokenType.BangEqual, 2) : (TokenType.Bang, 1),
-            '=' => IsMatch(source, "==") ? (TokenType.Equal, 2) : (TokenType.Assign, 1),
-            '<' => IsMatch(source, "<=") ? (TokenType.LessEqual, 2) : (TokenType.Less, 1),
-            '>' => IsMatch(source, ">=") ? (TokenType.GreaterEqual, 2) : (TokenType.Greater, 1),
+            '!' => IsMatch(source, "!=".AsSpan()) ? (TokenType.BangEqual, 2) : (TokenType.Bang, 1),
+            '=' => IsMatch(source, "==".AsSpan()) ? (TokenType.Equal, 2) : (TokenType.Assign, 1),
+            '<' => IsMatch(source, "<=".AsSpan()) ? (TokenType.LessEqual, 2) : (TokenType.Less, 1),
+            '>' => IsMatch(source, ">=".AsSpan()) ? (TokenType.GreaterEqual, 2) : (TokenType.Greater, 1),
             '"' => (TokenType.String, StringLength(source)),
             >= '0' and <= '9' => (TokenType.Number, NumberLength(source)),
-            '&' => IsMatch(source, "&&") ? (TokenType.And, 2) : (TokenType.BitwiseAnd, 1),
-            '|' => IsMatch(source, "||") ? (TokenType.Or, 2) : (TokenType.BitwiseOr, 1),
+            '&' => IsMatch(source, "&&".AsSpan()) ? (TokenType.And, 2) : (TokenType.BitwiseAnd, 1),
+            '|' => IsMatch(source, "||".AsSpan()) ? (TokenType.Or, 2) : (TokenType.BitwiseOr, 1),
             _ => (TokenType.Other, OtherLength(source))
         };
     }
@@ -149,5 +133,32 @@ public static class Lexer
         }
 
         return source.Length;
+    }
+
+    private static TokenType SelectKeywordType(ReadOnlySpan<char> source)
+    {
+        if (source.Equals("class".AsSpan(), StringComparison.Ordinal))
+            return TokenType.Class;
+        if (source.Equals("if".AsSpan(), StringComparison.Ordinal))
+            return TokenType.If;
+        if (source.Equals("else".AsSpan(), StringComparison.Ordinal))
+            return TokenType.Else;
+        if (source.Equals("while".AsSpan(), StringComparison.Ordinal))
+            return TokenType.While;
+        if (source.Equals("for".AsSpan(), StringComparison.Ordinal))
+            return TokenType.For;
+        if (source.Equals("nil".AsSpan(), StringComparison.Ordinal))
+            return TokenType.Nil;
+        if (source.Equals("return".AsSpan(), StringComparison.Ordinal))
+            return TokenType.Return;
+        if (source.Equals("this".AsSpan(), StringComparison.Ordinal))
+            return TokenType.This;
+        if (source.Equals("base".AsSpan(), StringComparison.Ordinal))
+            return TokenType.Base;
+        if (source.Equals("var".AsSpan(), StringComparison.Ordinal))
+            return TokenType.Var;
+        if (source.Equals("function".AsSpan(), StringComparison.Ordinal))
+            return TokenType.Function;
+        return TokenType.Identifier;
     }
 }
