@@ -2,6 +2,7 @@
 
 public enum TokenType
 {
+    None,
     LeftParen,
     RightParen,
     LeftBrace,
@@ -10,15 +11,15 @@ public enum TokenType
     Dot,
     Plus,
     Minus,
-    Star,
-    Slash,
+    Multiply,
+    Divide,
     Semicolon,
     Hash,
 
-    Bang,
-    BangEqual,
     Assign,
+    Not,
     Equal,
+    NotEqual,
     Greater,
     GreaterEqual,
     Less,
@@ -27,6 +28,8 @@ public enum TokenType
     Identifier,
     String,
     Number,
+    True,
+    False,
 
     And,
     Or,
@@ -45,6 +48,5 @@ public enum TokenType
     Var,
     Function,
 
-    Eof,
     Other
 }

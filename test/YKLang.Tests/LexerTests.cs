@@ -19,8 +19,8 @@ public class LexerTests
             new(TokenType.Dot, 5..6),
             new(TokenType.Plus, 6..7),
             new(TokenType.Minus, 7..8),
-            new(TokenType.Star, 8..9),
-            new(TokenType.Slash, 9..10),
+            new(TokenType.Multiply, 8..9),
+            new(TokenType.Divide, 9..10),
             new(TokenType.Semicolon, 10..11),
         };
 
@@ -50,8 +50,8 @@ public class LexerTests
         const string Source = "! != = == < <= > >= & && | ||";
         var expected = new List<Token>
         {
-            new(TokenType.Bang, 0..1),
-            new(TokenType.BangEqual, 2..4),
+            new(TokenType.Not, 0..1),
+            new(TokenType.NotEqual, 2..4),
             new(TokenType.Assign, 5..6),
             new(TokenType.Equal, 7..9),
             new(TokenType.Less, 10..11),

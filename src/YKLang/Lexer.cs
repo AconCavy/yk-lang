@@ -54,11 +54,11 @@ public static class Lexer
             '.' => (TokenType.Dot, 1),
             '+' => (TokenType.Plus, 1),
             '-' => (TokenType.Minus, 1),
-            '*' => (TokenType.Star, 1),
-            '/' => (TokenType.Slash, 1),
+            '*' => (TokenType.Multiply, 1),
+            '/' => (TokenType.Divide, 1),
             ';' => (TokenType.Semicolon, 1),
             '#' => (TokenType.Hash, CommentLength(source)),
-            '!' => IsMatch(source, "!=".AsSpan()) ? (TokenType.BangEqual, 2) : (TokenType.Bang, 1),
+            '!' => IsMatch(source, "!=".AsSpan()) ? (TokenType.NotEqual, 2) : (TokenType.Not, 1),
             '=' => IsMatch(source, "==".AsSpan()) ? (TokenType.Equal, 2) : (TokenType.Assign, 1),
             '<' => IsMatch(source, "<=".AsSpan()) ? (TokenType.LessEqual, 2) : (TokenType.Less, 1),
             '>' => IsMatch(source, ">=".AsSpan()) ? (TokenType.GreaterEqual, 2) : (TokenType.Greater, 1),
@@ -159,6 +159,10 @@ public static class Lexer
             return TokenType.Var;
         if (source.Equals("function".AsSpan(), StringComparison.Ordinal))
             return TokenType.Function;
+        if (source.Equals("true".AsSpan(), StringComparison.Ordinal))
+            return TokenType.True;
+        if (source.Equals("false".AsSpan(), StringComparison.Ordinal))
+            return TokenType.False;
         return TokenType.Identifier;
     }
 }
