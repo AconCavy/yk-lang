@@ -1,15 +1,15 @@
 ﻿namespace YKLang.Statements;
 
-internal class Block : Statement
+public class Block : Statement
 {
-    internal Statement[] Statements { get; }
+    public Statement[] Statements { get; }
 
-    internal Block(IEnumerable<Statement> statements)
+    public Block(IEnumerable<Statement> statements)
     {
         Statements = statements as Statement[] ?? statements.ToArray();
     }
 
-    internal override T Accept<T>(IVisitor<T> visitor)
+    public override T Accept<T>(IVisitor<T> visitor)
     {
         return visitor.Visit(this);
     }

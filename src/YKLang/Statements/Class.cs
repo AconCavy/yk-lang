@@ -1,19 +1,19 @@
 ﻿namespace YKLang.Statements;
 
-internal class Class : Statement
+public class Class : Statement
 {
-    internal Token Name { get; }
-    internal Expressions.Variable Base { get; }
-    internal Function[]? Functions { get; }
+    public Token Name { get; }
+    public Expressions.Variable Base { get; }
+    public Function[]? Functions { get; }
 
-    internal Class(Token name, Expressions.Variable @base, IEnumerable<Function> functions)
+    public Class(Token name, Expressions.Variable @base, IEnumerable<Function> functions)
     {
         Name = name;
         Base = @base;
         Functions = functions as Function[] ?? functions.ToArray();
     }
 
-    internal override T Accept<T>(IVisitor<T> visitor)
+    public override T Accept<T>(IVisitor<T> visitor)
     {
         return visitor.Visit(this);
     }

@@ -1,19 +1,19 @@
 ﻿namespace YKLang.Expressions;
 
-internal class Set : Expression
+public class Set : Expression
 {
-    internal Expression Object { get; }
-    internal Token Name { get; }
-    internal Expression Value { get; }
+    public Expression Object { get; }
+    public Token Name { get; }
+    public Expression Value { get; }
 
-    internal Set(Expression @object, Token name, Expression value)
+    public Set(Expression @object, Token name, Expression value)
     {
         Object = @object;
         Name = name;
         Value = value;
     }
 
-    internal override T Accept<T>(IVisitor<T> visitor)
+    public override T Accept<T>(IVisitor<T> visitor)
     {
         return visitor.Visit(this);
     }

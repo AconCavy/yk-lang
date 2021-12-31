@@ -1,19 +1,19 @@
 ﻿namespace YKLang.Expressions;
 
-internal class Logical : Expression
+public class Logical : Expression
 {
-    internal Expression Left { get; }
-    internal Token Operator { get; }
-    internal Expression Right { get; }
+    public Expression Left { get; }
+    public Token Operator { get; }
+    public Expression Right { get; }
 
-    internal Logical(Expression left, Token @operator, Expression right)
+    public Logical(Expression left, Token @operator, Expression right)
     {
         Left = left;
         Operator = @operator;
         Right = right;
     }
 
-    internal override T Accept<T>(IVisitor<T> visitor)
+    public override T Accept<T>(IVisitor<T> visitor)
     {
         return visitor.Visit(this);
     }

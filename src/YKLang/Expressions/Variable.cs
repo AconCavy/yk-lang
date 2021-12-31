@@ -1,15 +1,15 @@
 ﻿namespace YKLang.Expressions;
 
-internal class Variable : Expression
+public class Variable : Expression
 {
-    internal Token Name { get; }
+    public Token Name { get; }
 
-    internal Variable(Token name)
+    public Variable(Token name)
     {
         Name = name;
     }
 
-    internal override T Accept<T>(IVisitor<T> visitor)
+    public override T Accept<T>(IVisitor<T> visitor)
     {
         return visitor.Visit(this);
     }

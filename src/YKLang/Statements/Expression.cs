@@ -1,15 +1,15 @@
 ﻿namespace YKLang.Statements;
 
-internal class Expression : Statement
+public class Expression : Statement
 {
-    private Expressions.Expression Body { get; }
+    public Expressions.Expression Body { get; }
 
-    internal Expression(Expressions.Expression body)
+    public Expression(Expressions.Expression body)
     {
         Body = body;
     }
 
-    internal override T Accept<T>(IVisitor<T> visitor)
+    public override T Accept<T>(IVisitor<T> visitor)
     {
         return visitor.Visit(this);
     }

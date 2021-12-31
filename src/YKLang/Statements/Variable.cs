@@ -1,17 +1,17 @@
 ﻿namespace YKLang.Statements;
 
-internal class Variable : Statement
+public class Variable : Statement
 {
-    internal Token Name { get; }
-    internal Expressions.Expression Initializer { get; }
+    public Token Name { get; }
+    public Expressions.Expression Initializer { get; }
 
-    internal Variable(Token name, Expressions.Expression initializer)
+    public Variable(Token name, Expressions.Expression initializer)
     {
         Name = name;
         Initializer = initializer;
     }
 
-    internal override T Accept<T>(IVisitor<T> visitor)
+    public override T Accept<T>(IVisitor<T> visitor)
     {
         return visitor.Visit(this);
     }

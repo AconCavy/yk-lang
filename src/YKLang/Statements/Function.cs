@@ -1,12 +1,12 @@
 ﻿namespace YKLang.Statements;
 
-internal class Function : Statement
+public class Function : Statement
 {
-    internal Token Name { get; }
-    internal Token[]? Params { get; }
-    internal Statement[]? Body { get; }
+    public Token Name { get; }
+    public Token[]? Params { get; }
+    public Statement[]? Body { get; }
 
-    internal override T Accept<T>(IVisitor<T> visitor)
+    public override T Accept<T>(IVisitor<T> visitor)
     {
         return visitor.Visit(this);
     }

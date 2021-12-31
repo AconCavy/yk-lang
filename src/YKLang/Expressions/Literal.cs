@@ -1,15 +1,15 @@
 ﻿namespace YKLang.Expressions;
 
-internal class Literal : Expression
+public class Literal : Expression
 {
-    internal dynamic? Value { get; }
+    public dynamic? Value { get; }
 
-    internal Literal(dynamic? value)
+    public Literal(dynamic? value)
     {
         Value = value;
     }
 
-    internal override T Accept<T>(IVisitor<T> visitor)
+    public override T Accept<T>(IVisitor<T> visitor)
     {
         return visitor.Visit(this);
     }

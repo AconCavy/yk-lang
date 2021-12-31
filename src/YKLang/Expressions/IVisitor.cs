@@ -1,17 +1,17 @@
 ﻿namespace YKLang.Expressions;
 
-internal interface IVisitor<out T>
+public interface IVisitor<out T>
 {
-    internal T Visit(Assign expression);
-    internal T Visit(Binary expression);
-    internal T Visit(Call expression);
-    internal T Visit(Get expression);
-    internal T Visit(Grouping expression);
-    internal T Visit(Literal expression);
-    internal T Visit(Logical expression);
-    internal T Visit(Set expression);
-    internal T Visit(Base expression);
-    internal T Visit(This expression);
-    internal T Visit(Unary expression);
-    internal T Visit(Variable expression);
+    T Visit(Assign expression);
+    T Visit(Binary expression);
+    T Visit(Call expression);
+    T Visit(Get expression);
+    T Visit(Grouping expression);
+    T Visit(Literal expression);
+    T Visit(Logical expression);
+    T Visit(Set expression);
+    T Visit(Base expression);
+    T Visit(This expression);
+    T Visit(Unary expression);
+    T Visit(Variable expression);
 }

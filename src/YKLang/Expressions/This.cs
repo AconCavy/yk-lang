@@ -1,15 +1,15 @@
 ﻿namespace YKLang.Expressions;
 
-internal class This : Expression
+public class This : Expression
 {
-    internal Token Keyword { get; }
+    public Token Keyword { get; }
 
-    internal This(Token keyword)
+    public This(Token keyword)
     {
         Keyword = keyword;
     }
 
-    internal override T Accept<T>(IVisitor<T> visitor)
+    public override T Accept<T>(IVisitor<T> visitor)
     {
         return visitor.Visit(this);
     }

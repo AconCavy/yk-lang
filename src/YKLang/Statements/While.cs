@@ -1,17 +1,17 @@
 ﻿namespace YKLang.Statements;
 
-internal class While : Statement
+public class While : Statement
 {
-    internal Expressions.Expression Condition { get; }
-    internal Statement Body { get; }
+    public Expressions.Expression Condition { get; }
+    public Statement Body { get; }
 
-    internal While(Expressions.Expression condition, Statement body)
+    public While(Expressions.Expression condition, Statement body)
     {
         Condition = condition;
         Body = body;
     }
 
-    internal override T Accept<T>(IVisitor<T> visitor)
+    public override T Accept<T>(IVisitor<T> visitor)
     {
         return visitor.Visit(this);
     }

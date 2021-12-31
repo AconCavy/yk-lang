@@ -1,6 +1,6 @@
 ﻿namespace YKLang.Statements;
 
-internal abstract partial class Statement
+public abstract partial class Statement
 {
-    internal abstract T Accept<T>(IVisitor<T> visitor);
+    public abstract T Accept<T>(IVisitor<T> visitor);
 }

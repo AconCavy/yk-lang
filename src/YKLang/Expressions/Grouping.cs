@@ -1,15 +1,15 @@
 ﻿namespace YKLang.Expressions;
 
-internal class Grouping : Expression
+public class Grouping : Expression
 {
-    internal Expression Expression { get; }
+    public Expression Expression { get; }
 
     internal Grouping(Expression expression)
     {
         Expression = expression;
     }
 
-    internal override T Accept<T>(IVisitor<T> visitor)
+    public override T Accept<T>(IVisitor<T> visitor)
     {
         return visitor.Visit(this);
     }
