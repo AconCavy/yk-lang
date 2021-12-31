@@ -2,9 +2,9 @@
 
 internal class Literal : Expression
 {
-    internal Object Value { get; }
+    internal dynamic? Value { get; }
 
-    internal Literal(Object value)
+    internal Literal(dynamic? value)
     {
         Value = value;
     }
