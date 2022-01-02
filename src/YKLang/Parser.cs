@@ -14,7 +14,7 @@ public static class Parser
 
         var current = 0;
 
-        bool IsSafeIndex() => 0 <= current && current <= tokens.Count;
+        bool IsSafeIndex() => 0 <= current && current < tokens.Count;
         bool IsMatch(IEnumerable<TokenType> types) => IsSafeIndex() && types.Contains(tokens[current].Type);
 
         Expression Expression()
@@ -86,7 +86,7 @@ public static class Parser
 
         Expression Primary()
         {
-            var (type, range) = tokens[current];
+            var (type, range) = tokens[current++];
             return type switch
             {
                 TokenType.Number => new Literal(double.Parse(source[range])),
