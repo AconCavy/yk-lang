@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace YKLang.Tests;
@@ -9,124 +11,149 @@ public class LexerTests
     public void SingleCharacterTokensTest()
     {
         const string Source = "(){},.+-*/;";
-        var expected = new List<Token>
+        var expected = new ValuedToken[]
         {
-            new(TokenType.LeftParen, 0..1),
-            new(TokenType.RightParen, 1..2),
-            new(TokenType.LeftBrace, 2..3),
-            new(TokenType.RightBrace, 3..4),
-            new(TokenType.Comma, 4..5),
-            new(TokenType.Dot, 5..6),
-            new(TokenType.Plus, 6..7),
-            new(TokenType.Minus, 7..8),
-            new(TokenType.Multiply, 8..9),
-            new(TokenType.Divide, 9..10),
-            new(TokenType.Semicolon, 10..11),
+            new(TokenType.LeftParen, "("),
+            new(TokenType.RightParen, ")"),
+            new(TokenType.LeftBrace, "{"),
+            new(TokenType.RightBrace, "}"),
+            new(TokenType.Comma, ","),
+            new(TokenType.Dot, "."),
+            new(TokenType.Plus, "+"),
+            new(TokenType.Minus, "-"),
+            new(TokenType.Multiply, "*"),
+            new(TokenType.Divide, "/"),
+            new(TokenType.Semicolon, ";")
         };
 
         var actual = Lexer.Analyze(Source);
-        Assert.Equal(expected, actual);
+        AssertTokens(Source, expected, actual);
     }
 
     [Fact]
     public void HashTokenTest()
     {
         const string Source = "# Comment 1\n{}# Comment 2\n";
-        var expected = new List<Token>
+        var expected = new ValuedToken[]
         {
-            new(TokenType.Hash, 0..12),
-            new(TokenType.LeftBrace, 12..13),
-            new(TokenType.RightBrace, 13..14),
-            new(TokenType.Hash, 14..26),
+            new(TokenType.Hash, "# Comment 1\n"),
+            new(TokenType.LeftBrace, "{"),
+            new(TokenType.RightBrace, "}"),
+            new(TokenType.Hash, "# Comment 2\n")
         };
 
         var actual = Lexer.Analyze(Source);
-        Assert.Equal(expected, actual);
+        AssertTokens(Source, expected, actual);
     }
 
     [Fact]
     public void DoubleCharactersTokensTest()
     {
         const string Source = "! != = == < <= > >= & && | ||";
-        var expected = new List<Token>
+        var expected = new ValuedToken[]
         {
-            new(TokenType.Not, 0..1),
-            new(TokenType.NotEqual, 2..4),
-            new(TokenType.Assign, 5..6),
-            new(TokenType.Equal, 7..9),
-            new(TokenType.Less, 10..11),
-            new(TokenType.LessEqual, 12..14),
-            new(TokenType.Greater, 15..16),
-            new(TokenType.GreaterEqual, 17..19),
-            new(TokenType.BitwiseAnd, 20..21),
-            new(TokenType.And, 22..24),
-            new(TokenType.BitwiseOr, 25..26),
-            new(TokenType.Or, 27..29),
+            new(TokenType.Not, "!"),
+            new(TokenType.NotEqual, "!="),
+            new(TokenType.Assign, "="),
+            new(TokenType.Equal, "=="),
+            new(TokenType.Less, "<"),
+            new(TokenType.LessEqual, "<="),
+            new(TokenType.Greater, ">"),
+            new(TokenType.GreaterEqual, ">="),
+            new(TokenType.BitwiseAnd, "&"),
+            new(TokenType.And, "&&"),
+            new(TokenType.BitwiseOr, "|"),
+            new(TokenType.Or, "||")
         };
 
         var actual = Lexer.Analyze(Source);
-        Assert.Equal(expected, actual);
+        AssertTokens(Source, expected, actual);
     }
 
     [Fact]
     public void StringTokenTest()
     {
         const string Source = "{\"This is String\"}";
-        var expected = new List<Token>
+        var expected = new ValuedToken[]
         {
-            new(TokenType.LeftBrace, 0..1),
-            new(TokenType.String, 2..16),
-            new(TokenType.RightBrace, 17..18),
+            new(TokenType.LeftBrace, "{"),
+            new(TokenType.String, "This is String"),
+            new(TokenType.RightBrace, "}")
         };
 
         var actual = Lexer.Analyze(Source);
-        Assert.Equal(expected, actual);
+        AssertTokens(Source, expected, actual);
     }
 
     [Fact]
     public void NumberTokenTest()
     {
         const string Source = "{0.5.}";
-        var expected = new List<Token>
+        var expected = new ValuedToken[]
         {
-            new(TokenType.LeftBrace, 0..1),
-            new(TokenType.Number, 1..4),
-            new(TokenType.Dot, 4..5),
-            new(TokenType.RightBrace, 5..6),
+            new(TokenType.LeftBrace, "{"),
+            new(TokenType.Number, "0.5"),
+            new(TokenType.Dot, "."),
+            new(TokenType.RightBrace, "}")
         };
 
         var actual = Lexer.Analyze(Source);
-        Assert.Equal(expected, actual);
+        AssertTokens(Source, expected, actual);
+    }
+
+    [Fact]
+    public void BooleanTokenTest()
+    {
+        const string Source = "true false";
+        var expected = new ValuedToken[]
+        {
+            new(TokenType.True, "true"),
+            new(TokenType.False, "false")
+        };
+
+        var actual = Lexer.Analyze(Source);
+        AssertTokens(Source, expected, actual);
+
     }
 
     [Fact]
     public void KeywordTokenTest()
     {
-        const string Source = "class foo";
-        var expected = new List<Token>
+        const string Source = "class if else while for nil return this base var function foo";
+        var expected = new ValuedToken[]
         {
-            new(TokenType.Class, 0..5),
-            new(TokenType.Identifier, 6..9),
+            new(TokenType.Class, "class"),
+            new(TokenType.If, "if"),
+            new(TokenType.Else, "else"),
+            new(TokenType.While, "while"),
+            new(TokenType.For, "for"),
+            new(TokenType.Nil, "nil"),
+            new(TokenType.Return, "return"),
+            new(TokenType.This, "this"),
+            new(TokenType.Base, "base"),
+            new(TokenType.Var, "var"),
+            new(TokenType.Function, "function"),
+            new(TokenType.Identifier, "foo")
         };
 
         var actual = Lexer.Analyze(Source);
-        Assert.Equal(expected, actual);
+        AssertTokens(Source, expected, actual);
     }
 
     [Fact]
     public void DefineVariableTest()
     {
         const string Source = "var x = 1.0";
-        var expected = new List<Token>
+        var expected = new ValuedToken[]
         {
-            new(TokenType.Var, 0..3),
-            new(TokenType.Identifier, 4..5),
-            new(TokenType.Assign, 6..7),
-            new(TokenType.Number, 8..11),
+            new(TokenType.Var, "var"),
+            new(TokenType.Identifier, "x"),
+            new(TokenType.Assign, "="),
+            new(TokenType.Number, "1.0"),
         };
 
         var actual = Lexer.Analyze(Source);
-        Assert.Equal(expected, actual);
+        AssertTokens(Source, expected, actual);
     }
 
     [Theory]
@@ -184,4 +211,26 @@ public class LexerTests
         var actual = Lexer.OtherLength(source);
         Assert.Equal(expected, actual);
     }
+
+    [Fact]
+    public void AssertTokensTest()
+    {
+        const string Source = "( foo )";
+        var expected = new ValuedToken[]
+        {
+            new(TokenType.LeftParen, "("), new(TokenType.Identifier, "foo"), new(TokenType.RightParen, ")")
+        };
+        var actual = new Token[]
+        {
+            new(TokenType.LeftParen, 0..1), new(TokenType.Identifier, 2..5), new(TokenType.RightParen, 6..7)
+        };
+        AssertTokens(Source, expected, actual);
+    }
+
+    private static void AssertTokens(string source, IEnumerable<ValuedToken> expected, IEnumerable<Token> actual)
+    {
+        Assert.Equal(expected, actual.Select(x => new ValuedToken(x.Type, source[x.Range])));
+    }
+
+    private record ValuedToken(TokenType Type, string Value);
 }
