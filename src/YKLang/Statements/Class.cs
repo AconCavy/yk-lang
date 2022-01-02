@@ -3,10 +3,10 @@
 public class Class : Statement
 {
     public Token Name { get; }
-    public Expressions.Variable Base { get; }
-    public Function[]? Functions { get; }
+    public Expressions.Variable? Base { get; }
+    public Function[] Functions { get; }
 
-    public Class(Token name, Expressions.Variable @base, IEnumerable<Function> functions)
+    public Class(Token name, Expressions.Variable? @base, IEnumerable<Function> functions)
     {
         Name = name;
         Base = @base;

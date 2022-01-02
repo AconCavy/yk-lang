@@ -3,9 +3,9 @@
 public class Variable : Statement
 {
     public Token Name { get; }
-    public Expressions.Expression Initializer { get; }
+    public Expressions.Expression? Initializer { get; }
 
-    public Variable(Token name, Expressions.Expression initializer)
+    public Variable(Token name, Expressions.Expression? initializer)
     {
         Name = name;
         Initializer = initializer;
