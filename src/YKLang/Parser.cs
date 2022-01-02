@@ -87,24 +87,17 @@ public static class Parser
         Expression Primary()
         {
             var (type, range) = tokens[current];
-            switch (type)
+            return type switch
             {
-                case TokenType.Number:
-                    return new Literal(double.Parse(source[range]));
-                case TokenType.String:
-                    return new Literal(source[range]);
-                case TokenType.True:
-                    return new Literal(true);
-                case TokenType.False:
-                    return new Literal(false);
-                case TokenType.Nil:
-                    return new Literal(null);
-                case TokenType.LeftParen:
-                    return Grouping();
-                default:
-                    throw new ParseException(
-                        "Expect values of Number, String, and Boolean, Nil, or grouped expressions.");
-            }
+                TokenType.Number => new Literal(double.Parse(source[range])),
+                TokenType.String => new Literal(source[range]),
+                TokenType.True => new Literal(true),
+                TokenType.False => new Literal(false),
+                TokenType.Nil => new Literal(null),
+                TokenType.LeftParen => Grouping(),
+                _ => throw new ParseException(
+                    "Expect values of Number, String, and Boolean, Nil, or grouped expressions.")
+            };
         }
 
         Expression Grouping()
