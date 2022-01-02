@@ -2,129 +2,119 @@
 
 namespace YKLang;
 
-public class Parser
+public static class Parser
 {
-    private string Source { get; }
-    private Token[] Tokens { get; }
-    private int Index { get; set; }
-    private Token Current => Tokens[Index];
-
-    private readonly TokenType[] _equalityTokens = { TokenType.Equal, TokenType.NotEqual };
-    private readonly TokenType[] _comparisonTokens =
+    public static Expression Parse(string source, IReadOnlyList<Token> tokens)
     {
-        TokenType.Greater, TokenType.GreaterEqual, TokenType.Less, TokenType.LessEqual
-    };
-    private readonly TokenType[] _termTokens = { TokenType.Plus, TokenType.Minus };
-    private readonly TokenType[] _factorTokens = { TokenType.Multiply, TokenType.Divide };
-    private readonly TokenType[] _unaryTokens = { TokenType.Not, TokenType.Minus };
+        var equalityTokens = new[] { TokenType.Equal, TokenType.NotEqual };
+        var comparisonTokens = new[] { TokenType.Greater, TokenType.GreaterEqual, TokenType.Less, TokenType.LessEqual };
+        var termTokens = new[] { TokenType.Plus, TokenType.Minus };
+        var factorTokens = new[] { TokenType.Multiply, TokenType.Divide };
+        var unaryTokens = new[] { TokenType.Not, TokenType.Minus };
 
-    public Parser(string source, IEnumerable<Token> tokens)
-    {
-        Source = source;
-        Tokens = tokens as Token[] ?? tokens.ToArray();
-        Index = 0;
-    }
+        var current = 0;
 
-    public Expression Expression()
-    {
-        return Equality();
-    }
+        bool IsSafeIndex() => 0 <= current && current <= tokens.Count;
+        bool IsMatch(IEnumerable<TokenType> types) => IsSafeIndex() && types.Contains(tokens[current].Type);
 
-    private Expression Equality()
-    {
-        var expression = Comparison();
-        while (IsMatch(_equalityTokens))
+        Expression Expression()
         {
-            var op = Current;
-            Index++;
-            var right = Comparison();
-            expression = new Binary(expression, op, right);
+            return Equality();
         }
 
-        return expression;
-    }
-
-    private Expression Comparison()
-    {
-        var expression = Term();
-        while (IsMatch(_comparisonTokens))
+        Expression Equality()
         {
-            var op = Current;
-            Index++;
-            var right = Term();
-            expression = new Binary(expression, op, right);
+            var expression = Comparison();
+            while (IsMatch(equalityTokens))
+            {
+                var op = tokens[current++];
+                var right = Comparison();
+                expression = new Binary(expression, op, right);
+            }
+
+            return expression;
         }
 
-        return expression;
-    }
-
-    private Expression Term()
-    {
-        var expression = Factor();
-        while (IsMatch(_termTokens))
+        Expression Comparison()
         {
-            var op = Current;
-            Index++;
-            var right = Factor();
-            expression = new Binary(expression, op, right);
+            var expression = Term();
+            while (IsMatch(comparisonTokens))
+            {
+                var op = tokens[current++];
+                var right = Term();
+                expression = new Binary(expression, op, right);
+            }
+
+            return expression;
         }
 
-        return expression;
-    }
-
-    private Expression Factor()
-    {
-        var expression = Unary();
-        while (IsMatch(_factorTokens))
+        Expression Term()
         {
-            var op = Current;
-            Index++;
+            var expression = Factor();
+            while (IsMatch(termTokens))
+            {
+                var op = tokens[current++];
+                var right = Factor();
+                expression = new Binary(expression, op, right);
+            }
+
+            return expression;
+        }
+
+        Expression Factor()
+        {
+            var expression = Unary();
+            while (IsMatch(factorTokens))
+            {
+                var op = tokens[current++];
+                var right = Unary();
+                expression = new Binary(expression, op, right);
+            }
+
+            return expression;
+        }
+
+        Expression Unary()
+        {
+            if (!IsMatch(unaryTokens))
+                return Primary();
+
+            var op = tokens[current++];
             var right = Unary();
-            expression = new Binary(expression, op, right);
+            return new Unary(op, right);
         }
 
-        return expression;
-    }
-
-    private Expression Unary()
-    {
-        if (!IsMatch(_unaryTokens))
-            return Primary();
-
-        var op = Current;
-        Index++;
-        var right = Unary();
-        return new Unary(op, right);
-    }
-
-    private Expression Primary()
-    {
-        switch (Current.Type)
+        Expression Primary()
         {
-            case TokenType.True:
-                return new Literal(true);
-            case TokenType.False:
-                return new Literal(false);
-            case TokenType.Nil:
-                return new Literal(null);
-            case TokenType.Number:
-                return new Literal(double.Parse(Source[Current.Range]));
-            case TokenType.String:
-                return new Literal(Source[Current.Range]);
-            default: throw new ParseException();
+            var (type, range) = tokens[current];
+            switch (type)
+            {
+                case TokenType.Number:
+                    return new Literal(double.Parse(source[range]));
+                case TokenType.String:
+                    return new Literal(source[range]);
+                case TokenType.True:
+                    return new Literal(true);
+                case TokenType.False:
+                    return new Literal(false);
+                case TokenType.Nil:
+                    return new Literal(null);
+                case TokenType.LeftParen:
+                    return Grouping();
+                default:
+                    throw new ParseException(
+                        "Expect values of Number, String, and Boolean, Nil, or grouped expressions.");
+            }
         }
-    }
 
-    private bool IsMatch(ReadOnlySpan<TokenType> types)
-    {
-        if (Index < 0 || Tokens.Length <= Index)
-            return false;
-        foreach (var type in types)
+        Expression Grouping()
         {
-            if (type == Current.Type)
-                return true;
+            var expression = Expression();
+            return IsSafeIndex() && tokens[current].Type == TokenType.RightParen
+                ? new Grouping(expression)
+                : throw new ParseException("Expect ')' after expression.");
         }
 
-        return false;
+        return Expression();
     }
 }
