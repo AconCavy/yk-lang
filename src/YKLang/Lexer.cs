@@ -9,7 +9,7 @@ public static class Lexer
         '(', ')', '{', '}', ',', '.', '+', '-', '*', '/', '!', '=', '<', '>', '&', '|', ' ', '\t', '\r', '\n'
     };
 
-    public static ICollection<Token> Analyze(ReadOnlySpan<char> source)
+    public static IReadOnlyList<Token> Analyze(ReadOnlySpan<char> source)
     {
         var current = 0;
         var tokens = new List<Token>();
