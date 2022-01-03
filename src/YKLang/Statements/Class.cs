@@ -4,13 +4,13 @@ public class Class : Statement
 {
     public Token Name { get; }
     public Expressions.Variable? Base { get; }
-    public Function[] Functions { get; }
+    public Function[] Methods { get; }
 
-    public Class(Token name, Expressions.Variable? @base, IEnumerable<Function> functions)
+    public Class(Token name, Expressions.Variable? @base, IEnumerable<Function> methods)
     {
         Name = name;
         Base = @base;
-        Functions = functions as Function[] ?? functions.ToArray();
+        Methods = methods as Function[] ?? methods.ToArray();
     }
 
     public override T Accept<T>(IVisitor<T> visitor)

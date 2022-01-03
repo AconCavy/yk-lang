@@ -45,7 +45,7 @@ public class AstStringBuilder : IAstBuilder<string>
             builder.Append($" : {ToString(statement.Base)}");
         }
 
-        foreach (var function in statement.Functions)
+        foreach (var function in statement.Methods)
         {
             builder.Append($" {ToString(function)}");
         }
@@ -63,10 +63,10 @@ public class AstStringBuilder : IAstBuilder<string>
     {
         var builder = new StringBuilder();
         builder.Append($"(function {GetTokenString(statement.Name)} + \"(\"");
-        if (statement.Params is { })
+        if (statement.Params.Length > 0)
             builder.Append(string.Join(" ", statement.Params.Select(GetTokenString)));
         builder.Append(") ");
-        if (statement.Body is { })
+        if (statement.Body.Length > 0)
             builder.Append(string.Join(" ", statement.Body.Select(x => x.Accept(this))));
         builder.Append(')');
         return builder.ToString();
