@@ -10,7 +10,7 @@ public class LexerTests
     [Fact]
     public void SingleCharacterTokensTest()
     {
-        const string Source = "(){},.+-*/;";
+        const string Source = "(){},.+-*/:;";
         var expected = new ValuedToken[]
         {
             new(TokenType.LeftParen, "("),
@@ -23,6 +23,7 @@ public class LexerTests
             new(TokenType.Minus, "-"),
             new(TokenType.Multiply, "*"),
             new(TokenType.Divide, "/"),
+            new(TokenType.Colon, ":"),
             new(TokenType.Semicolon, ";")
         };
 

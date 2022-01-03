@@ -13,6 +13,7 @@ public enum TokenType
     Minus,
     Multiply,
     Divide,
+    Colon,
     Semicolon,
     Hash,
 

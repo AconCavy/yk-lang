@@ -56,6 +56,7 @@ public static class Lexer
             '-' => (TokenType.Minus, 1),
             '*' => (TokenType.Multiply, 1),
             '/' => (TokenType.Divide, 1),
+            ':' => (TokenType.Colon, 1),
             ';' => (TokenType.Semicolon, 1),
             '#' => (TokenType.Hash, CommentLength(source)),
             '!' => IsMatch(source, "!=".AsSpan()) ? (TokenType.NotEqual, 2) : (TokenType.Not, 1),
