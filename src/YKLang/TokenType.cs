@@ -49,5 +49,6 @@ public enum TokenType
     Var,
     Function,
 
-    Other
+    Other,
+    Eof
 }
