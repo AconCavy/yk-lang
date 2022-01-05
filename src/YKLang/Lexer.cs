@@ -6,7 +6,7 @@ public static class Lexer
 
     private static readonly IReadOnlySet<char> s_separator = new HashSet<char>
     {
-        '(', ')', '{', '}', ',', '.', '+', '-', '*', '/', '!', '=', '<', '>', '&', '|', ' ', '\t', '\r', '\n'
+        '(', ')', '{', '}', ',', '.', ':', ';', '+', '-', '*', '/', '!', '=', '<', '>', '&', '|', ' ', '\t', '\r', '\n'
     };
 
     public static IReadOnlyList<Token> Analyze(ReadOnlySpan<char> source)
