@@ -1,34 +1,67 @@
 ﻿using YKLang.Expressions;
 using YKLang.Statements;
 using Expression = YKLang.Expressions.Expression;
+using Variable = YKLang.Expressions.Variable;
 
 namespace YKLang;
 
 public static class Parser
 {
-    public static Expression Parse(string source, IReadOnlyList<Token> tokens)
+    public static IEnumerable<Statement> Parse(string source, IEnumerable<Token> tokens)
     {
-        var current = 0;
-
-        bool IsSafeIndex() => 0 <= current && current < tokens.Count;
-        bool IsMatch(params TokenType[] types) => IsSafeIndex() && types.Contains(tokens[current].Type);
-
-        Expression Expression()
+        var queue = new Queue<Token>(tokens);
+        var statements = new List<Statement>();
+        while (!IsMatch(TokenType.Eof))
         {
-            return Assignment();
+            var declaration = Declaration();
+            if (declaration is { })
+                statements.Add(declaration);
+        }
+
+        return statements;
+
+        Token Advance() => queue.Count > 0 ? queue.Dequeue() : Token.Eof;
+        Token Peek() => queue.Count > 0 ? queue.Peek() : Token.Eof;
+        bool IsMatch(TokenType type) => type == Peek().Type;
+        bool AnyMatch(params TokenType[] types) => types.Contains(Peek().Type);
+
+        Token Expect(TokenType type, string message) =>
+            IsMatch(type) ? Advance() : throw new ParseException(message);
+
+        void Seek()
+        {
+            while (!IsMatch(TokenType.Eof))
+            {
+                switch (Peek().Type)
+                {
+                    case TokenType.Semicolon:
+                        _ = Advance();
+                        return;
+                    case TokenType.Class:
+                    case TokenType.Function:
+                    case TokenType.Var:
+                    case TokenType.For:
+                    case TokenType.If:
+                    case TokenType.While:
+                    case TokenType.Return:
+                        return;
+                }
+
+                _ = Advance();
+            }
         }
 
         Statement? Declaration()
         {
             try
             {
-                if (IsMatch(TokenType.Class))
-                    return ClassDeclaration();
-                if (IsMatch(TokenType.Function))
-                    return Function("function");
-                if (IsMatch(TokenType.Var))
-                    return VarDeclaration();
-                return Statement();
+                return Peek().Type switch
+                {
+                    TokenType.Class => ClassDeclaration(),
+                    TokenType.Function => FunctionDeclaration("function"),
+                    TokenType.Var => VarDeclaration(),
+                    _ => Statement()
+                };
             }
             catch (ParseException)
             {
@@ -37,70 +70,109 @@ public static class Parser
             }
         }
 
-        Statement ClassDeclaration()
+        Class ClassDeclaration()
         {
-            if (!IsMatch(TokenType.Identifier))
-                throw new ParseException("Expect class name.");
-            var name = tokens[current++];
+            _ = Expect(TokenType.Class, "Expect 'class' keyword");
+            var name = Expect(TokenType.Identifier, "Expect class name.");
 
-            Expressions.Variable? baseClass = null;
+            Variable? baseClass = null;
             if (IsMatch(TokenType.Colon))
             {
-                if (!IsMatch(TokenType.Identifier))
-                    throw new ParseException("Expect class name.");
-                baseClass = new Expressions.Variable(tokens[current++]);
+                _ = Advance();
+                var baseName = Expect(TokenType.Identifier, "Expect class name.");
+                baseClass = new Variable(baseName);
             }
 
-            if (!IsMatch(TokenType.LeftBrace))
-                throw new ParseException("Expect '{' before class body.");
+            _ = Expect(TokenType.LeftBrace, "Expect '{' before class body.");
 
             var methods = new List<Function>();
-            while (!IsMatch(TokenType.RightBrace))
+            while (!AnyMatch(TokenType.RightBrace, TokenType.Eof))
             {
-                methods.Add(Function("Method"));
+                methods.Add(FunctionDeclaration("Method"));
             }
 
-            if (!IsMatch(TokenType.RightBrace))
-                throw new ParseException("Expect '{' before class body.");
+            _ = Expect(TokenType.RightBrace, "Expect '}' after class body.");
 
             return new Class(name, baseClass, methods);
         }
 
+        Function FunctionDeclaration(string kind)
+        {
+            _ = Expect(TokenType.Function, "Expect 'function' keyword");
+            var name = Expect(TokenType.Identifier, $"Expect {kind} name.");
+            _ = Expect(TokenType.LeftParen, $"Expect '(' after {kind} name.");
+
+            var arguments = new List<Token>();
+            if (!IsMatch(TokenType.RightParen))
+            {
+                do
+                {
+                    var argument = Expect(TokenType.Identifier, "Expect argument name.");
+                    arguments.Add(argument);
+                } while (IsMatch(TokenType.Comma));
+            }
+
+            _ = Expect(TokenType.RightParen, "Expect ')' after arguments.");
+            var body = Block();
+
+            return new Function(name, arguments, body);
+        }
+
+        Statements.Variable VarDeclaration()
+        {
+            _ = Expect(TokenType.Var, "Expect 'var' keyword");
+            var name = Expect(TokenType.Identifier, "Expect variable name.");
+            Expression? initializer = null;
+            if (IsMatch(TokenType.Assign))
+            {
+                _ = Advance();
+                initializer = Expression();
+            }
+
+            _ = Expect(TokenType.Semicolon, "Expect ';' after variable declaration.");
+
+            return new Statements.Variable(name, initializer);
+        }
+
         Statement Statement()
         {
-            if (IsMatch(TokenType.For))
-                return ForStatement();
-            if (IsMatch(TokenType.If))
-                return IfStatement();
-            if (IsMatch(TokenType.Return))
-                return ReturnStatement();
-            if (IsMatch(TokenType.While))
-                return WhileStatement();
-            if (IsMatch(TokenType.LeftBrace))
-                return new Block(Block());
-
-            return ExpressionStatement();
+            return Peek().Type switch
+            {
+                TokenType.For => ForStatement(),
+                TokenType.If => IfStatement(),
+                TokenType.Return => ReturnStatement(),
+                TokenType.While => WhileStatement(),
+                TokenType.LeftBrace => new Block(Block()),
+                _ => ExpressionStatement()
+            };
         }
 
         Statement ForStatement()
         {
-            if (!IsMatch(TokenType.LeftParen))
-                throw new ParseException("Expect '(' after 'for' keyword.");
+            _ = Expect(TokenType.For, "Expect 'for' keyword");
+            _ = Expect(TokenType.LeftParen, "Expect '(' after 'for' keyword.");
 
-            Statement? initializer = tokens[current].Type switch
+            Statement? initializer = null;
+            switch (Peek().Type)
             {
-                TokenType.Semicolon => null,
-                TokenType.Var => null,
-                _ => null
-            };
+                case TokenType.Semicolon:
+                    _ = Advance();
+                    break;
+                case TokenType.Var:
+                    initializer = VarDeclaration();
+                    break;
+                default:
+                    initializer = ExpressionStatement();
+                    break;
+            }
 
-            Expression? condition = IsMatch(TokenType.Semicolon)
-                ? null
-                : throw new ParseException("Expect ';' after loop condition.");
+            var condition = IsMatch(TokenType.Semicolon) ? null : Expression();
 
-            Expression? increment = IsMatch(TokenType.RightParen)
-                ? null
-                : throw new ParseException("Expect ')' after for clauses.");
+            _ = Expect(TokenType.Semicolon, "Expect ';' after loop condition.");
+
+            var increment = IsMatch(TokenType.RightParen) ? null : Expression();
+
+            _ = Expect(TokenType.RightParen, "Expect ')' after for clauses.");
 
             var body = Statement();
 
@@ -118,13 +190,10 @@ public static class Parser
 
         Statement IfStatement()
         {
-            if (!IsMatch(TokenType.LeftParen))
-                throw new ParseException("Expect '(' after 'if' keyword.");
-
+            _ = Expect(TokenType.If, "Expect 'if' keyword");
+            _ = Expect(TokenType.LeftParen, "Expect '(' after 'if' keyword.");
             var condition = Expression();
-
-            if (!IsMatch(TokenType.RightParen))
-                throw new ParseException("Expect ')' after 'if' condition.");
+            _ = Expect(TokenType.RightParen, "Expect ')' after 'if' condition.");
 
             var thenBranch = Statement();
             var elseBranch = IsMatch(TokenType.Else) ? Statement() : null;
@@ -134,38 +203,19 @@ public static class Parser
 
         Statement ReturnStatement()
         {
-            var keyword = tokens[current++];
+            var keyword = Expect(TokenType.Return, "Expect 'return' keyword");
             var value = IsMatch(TokenType.Semicolon) ? null : Expression();
-            if (!IsMatch(TokenType.Semicolon))
-                throw new ParseException("Expect ';' after return value.");
+            _ = Expect(TokenType.Semicolon, "Expect ';' after return value.");
 
             return new Return(keyword, value);
         }
 
-        Statement VarDeclaration()
-        {
-            if (!IsMatch(TokenType.Identifier))
-                throw new ParseException($"Expect variable name.");
-
-            var name = tokens[current++];
-            var initializer = IsMatch(TokenType.Assign) ? Expression() : null;
-
-            if (!IsMatch(TokenType.Semicolon))
-                throw new ParseException("Expect ';' after variable declaration.");
-
-            return new Statements.Variable(name, initializer);
-        }
-
         Statement WhileStatement()
         {
-            if (!IsMatch(TokenType.LeftParen))
-                throw new ParseException("Expect '(' after 'while' keyword.");
-
+            _ = Expect(TokenType.While, "Expect 'while' keyword");
+            _ = Expect(TokenType.LeftParen, "Expect '(' after 'while' keyword.");
             var condition = Expression();
-
-            if (!IsMatch(TokenType.RightParen))
-                throw new ParseException("Expect ')' after 'while' condition.");
-
+            _ = Expect(TokenType.RightParen, "Expect ')' after 'while' condition.");
             var body = Statement();
 
             return new While(condition, body);
@@ -174,53 +224,31 @@ public static class Parser
         Statement ExpressionStatement()
         {
             var expression = Expression();
-            if (!IsMatch(TokenType.Semicolon))
-                throw new ParseException("Expect ';' after expression.");
+            _ = Expect(TokenType.Semicolon, "Expect ';' after expression.");
 
             return new Statements.Expression(expression);
         }
 
-        Function Function(string kind)
-        {
-            if (!IsMatch(TokenType.Identifier))
-                throw new ParseException($"Expect {kind} name.");
-            var name = tokens[current++];
-
-            if (!IsMatch(TokenType.LeftParen))
-                throw new ParseException($"Expect '(' after {kind} name.");
-
-            var arguments = new List<Token>();
-            if (!IsMatch(TokenType.RightParen))
-            {
-                do
-                {
-                    if (!IsMatch(TokenType.Identifier))
-                        throw new ParseException($"Expect argument name.");
-                    arguments.Add(tokens[current++]);
-                } while (IsMatch(TokenType.Comma));
-            }
-
-            if (!IsMatch(TokenType.RightParen))
-                throw new ParseException($"Expect ')' after arguments.");
-
-            var body = Block();
-            return new Function(name, arguments, body);
-        }
-
         IEnumerable<Statement> Block()
         {
-            var statements = new List<Statement>();
-            while (!IsMatch(TokenType.RightBrace))
+            _ = Expect(TokenType.LeftBrace, "Expect '{' before block");
+
+            var stmts = new List<Statement>();
+            while (!AnyMatch(TokenType.RightBrace, TokenType.Eof))
             {
                 var declaration = Declaration();
                 if (declaration is { })
-                    statements.Add(declaration);
+                    stmts.Add(declaration);
             }
 
-            if (!IsMatch(TokenType.RightBrace))
-                throw new ParseException("Expect '}' after block.");
+            _ = Expect(TokenType.RightBrace, "Expect '}' after block.");
 
-            return statements;
+            return stmts;
+        }
+
+        Expression Expression()
+        {
+            return Assignment();
         }
 
         Expression Assignment()
@@ -229,10 +257,11 @@ public static class Parser
             if (!IsMatch(TokenType.Assign))
                 return expression;
 
+            _ = Advance();
             var value = Assignment();
             return expression switch
             {
-                Expressions.Variable ev => new Assign(ev.Name, value),
+                Variable ev => new Assign(ev.Name, value),
                 Get eg => new Set(eg.Object, eg.Name, value),
                 _ => throw new ParseException("Invalid assignment target.")
             };
@@ -243,7 +272,7 @@ public static class Parser
             var expression = And();
             while (IsMatch(TokenType.Or))
             {
-                var op = tokens[current++];
+                var op = Advance();
                 var right = And();
                 expression = new Logical(expression, op, right);
             }
@@ -256,7 +285,7 @@ public static class Parser
             var expression = Equality();
             while (IsMatch(TokenType.And))
             {
-                var op = tokens[current++];
+                var op = Advance();
                 var right = Equality();
                 expression = new Logical(expression, op, right);
             }
@@ -267,9 +296,9 @@ public static class Parser
         Expression Equality()
         {
             var expression = Comparison();
-            while (IsMatch(TokenType.Equal, TokenType.NotEqual))
+            while (AnyMatch(TokenType.Equal, TokenType.NotEqual))
             {
-                var op = tokens[current++];
+                var op = Advance();
                 var right = Comparison();
                 expression = new Binary(expression, op, right);
             }
@@ -280,9 +309,9 @@ public static class Parser
         Expression Comparison()
         {
             var expression = Term();
-            while (IsMatch(TokenType.Greater, TokenType.GreaterEqual, TokenType.Less, TokenType.LessEqual))
+            while (AnyMatch(TokenType.Greater, TokenType.GreaterEqual, TokenType.Less, TokenType.LessEqual))
             {
-                var op = tokens[current++];
+                var op = Advance();
                 var right = Term();
                 expression = new Binary(expression, op, right);
             }
@@ -293,9 +322,9 @@ public static class Parser
         Expression Term()
         {
             var expression = Factor();
-            while (IsMatch(TokenType.Plus, TokenType.Minus))
+            while (AnyMatch(TokenType.Plus, TokenType.Minus))
             {
-                var op = tokens[current++];
+                var op = Advance();
                 var right = Factor();
                 expression = new Binary(expression, op, right);
             }
@@ -306,9 +335,9 @@ public static class Parser
         Expression Factor()
         {
             var expression = Unary();
-            while (IsMatch(TokenType.Multiply, TokenType.Divide))
+            while (AnyMatch(TokenType.Multiply, TokenType.Divide))
             {
-                var op = tokens[current++];
+                var op = Advance();
                 var right = Unary();
                 expression = new Binary(expression, op, right);
             }
@@ -318,62 +347,80 @@ public static class Parser
 
         Expression Unary()
         {
-            if (!IsMatch(TokenType.Not, TokenType.Minus))
-                return Primary();
+            if (!AnyMatch(TokenType.Not, TokenType.Minus))
+                return Call();
 
-            var op = tokens[current++];
+            var op = Advance();
             var right = Unary();
             return new Unary(op, right);
         }
 
+        Expression Call()
+        {
+            var expression = Primary();
+            while (true)
+            {
+                if (IsMatch(TokenType.LeftParen))
+                {
+                    _ = Advance();
+                    var args = new List<Expression>();
+                    if (!IsMatch(TokenType.RightParen))
+                    {
+                        do
+                        {
+                            args.Add(Expression());
+                        } while (IsMatch(TokenType.Comma));
+                    }
+
+                    var paren = Expect(TokenType.RightParen, "Expect ')' after arguments.");
+                    return new Call(expression, paren, args);
+                }
+
+                if (IsMatch(TokenType.Dot))
+                {
+                    _ = Advance();
+                    var name = Expect(TokenType.Identifier, "Expect property name after '.'.");
+                    return new Get(expression, name);
+                }
+
+                break;
+            }
+
+            return expression;
+        }
+
         Expression Primary()
         {
-            var (type, range) = tokens[current++];
-            return type switch
+            var token = Advance();
+            return token.Type switch
             {
-                TokenType.Number => new Literal(double.Parse(source[range])),
-                TokenType.String => new Literal(source[range]),
+                TokenType.Number => new Literal(double.Parse(source[token.Range])),
+                TokenType.String => new Literal(source[token.Range]),
                 TokenType.True => new Literal(true),
                 TokenType.False => new Literal(false),
                 TokenType.Nil => new Literal(null),
+                TokenType.Identifier => new Variable(token),
+                TokenType.Base => Base(token),
+                TokenType.This => new This(token),
                 TokenType.LeftParen => Grouping(),
-                _ => throw new ParseException(
-                    "Expect values of Number, String, and Boolean, Nil, or grouped expressions.")
+                _ => throw new ParseException("Expect expressions.")
             };
+        }
+
+        Expression Base(Token keyword)
+        {
+            _ = Expect(TokenType.Dot, "Expect '.' after 'base' keyword.");
+            var method = Expect(TokenType.Dot, "Expect 'baseclass' method name.");
+
+            return new Base(keyword, method);
         }
 
         Expression Grouping()
         {
             var expression = Expression();
-            return IsMatch(TokenType.RightParen)
-                ? new Grouping(expression)
-                : throw new ParseException("Expect ')' after expression.");
+            _ = Expect(TokenType.RightParen, "Expect ')' after expression.");
+
+            return new Grouping(expression);
         }
-
-        void Seek()
-        {
-            current++;
-            while (IsSafeIndex())
-            {
-                var (type, _) = tokens[current];
-                if (type is TokenType.Semicolon)
-                    return;
-                switch (type)
-                {
-                    case TokenType.Class:
-                    case TokenType.Function:
-                    case TokenType.Var:
-                    case TokenType.For:
-                    case TokenType.If:
-                    case TokenType.While:
-                    case TokenType.Return:
-                        return;
-                }
-
-                current++;
-            }
-        }
-
-        return Expression();
     }
 }
