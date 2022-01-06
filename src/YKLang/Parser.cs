@@ -410,22 +410,22 @@ public static class Parser
                 TokenType.LeftParen => Grouping(),
                 _ => throw new ParseException("Expect expressions.")
             };
-        }
 
-        Expression Base(Token keyword)
-        {
-            _ = Expect(TokenType.Dot, "Expect '.' after 'base' keyword.");
-            var method = Expect(TokenType.Dot, "Expect 'baseclass' method name.");
+            Expression Base(Token keyword)
+            {
+                _ = Expect(TokenType.Dot, "Expect '.' after 'base' keyword.");
+                var method = Expect(TokenType.Identifier, "Expect 'baseclass' method name.");
 
-            return new Base(keyword, method);
-        }
+                return new Base(keyword, method);
+            }
 
-        Expression Grouping()
-        {
-            var expression = Expression();
-            _ = Expect(TokenType.RightParen, "Expect ')' after expression.");
+            Expression Grouping()
+            {
+                var expression = Expression();
+                _ = Expect(TokenType.RightParen, "Expect ')' after expression.");
 
-            return new Grouping(expression);
+                return new Grouping(expression);
+            }
         }
     }
 }
