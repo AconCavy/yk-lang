@@ -40,9 +40,9 @@ public class AstStringBuilder : Statements.IVisitor<string>, Expressions.IVisito
     {
         var builder = new StringBuilder();
         builder.Append($"(class {GetTokenString(statement.Name)}");
-        if (statement.Base is { })
+        if (statement.BaseClass is { })
         {
-            builder.Append($" : {ToString(statement.Base)}");
+            builder.Append($" : {ToString(statement.BaseClass)}");
         }
 
         foreach (var function in statement.Methods)
@@ -63,8 +63,8 @@ public class AstStringBuilder : Statements.IVisitor<string>, Expressions.IVisito
     {
         var builder = new StringBuilder();
         builder.Append($"(function {GetTokenString(statement.Name)}(");
-        if (statement.Params.Length > 0)
-            builder.Append(string.Join(" ", statement.Params.Select(GetTokenString)));
+        if (statement.Parameters.Length > 0)
+            builder.Append(string.Join(" ", statement.Parameters.Select(GetTokenString)));
         builder.Append(')');
         if (statement.Body.Length > 0)
         {
@@ -78,9 +78,9 @@ public class AstStringBuilder : Statements.IVisitor<string>, Expressions.IVisito
 
     public string Visit(If statement)
     {
-        return statement.Else is null
-            ? Parenthesize("if", statement.Condition, statement.Then)
-            : Parenthesize("if-else", statement.Condition, statement.Then, statement.Else);
+        return statement.ElseBranch is null
+            ? Parenthesize("if", statement.Condition, statement.ThenBranch)
+            : Parenthesize("if-else", statement.Condition, statement.ThenBranch, statement.ElseBranch);
     }
 
     public string Visit(Return statement)

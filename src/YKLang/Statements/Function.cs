@@ -3,13 +3,13 @@
 public class Function : Statement
 {
     public Token Name { get; }
-    public Token[] Params { get; }
+    public Token[] Parameters { get; }
     public Statement[] Body { get; }
 
-    public Function(Token name, IEnumerable<Token> @params, IEnumerable<Statement> body)
+    public Function(Token name, IEnumerable<Token> parameters, IEnumerable<Statement> body)
     {
         Name = name;
-        Params = @params.ToArray();
+        Parameters = parameters.ToArray();
         Body = body.ToArray();
     }
 

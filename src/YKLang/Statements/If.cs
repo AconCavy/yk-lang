@@ -3,14 +3,14 @@
 public class If : Statement
 {
     public Expressions.Expression Condition { get; }
-    public Statement Then { get; }
-    public Statement? Else { get; }
+    public Statement ThenBranch { get; }
+    public Statement? ElseBranch { get; }
 
-    public If(Expressions.Expression condition, Statement then, Statement? @else)
+    public If(Expressions.Expression condition, Statement thenBranch, Statement? elseBranch)
     {
         Condition = condition;
-        Then = then;
-        Else = @else;
+        ThenBranch = thenBranch;
+        ElseBranch = elseBranch;
     }
 
     public override T Accept<T>(IVisitor<T> visitor)

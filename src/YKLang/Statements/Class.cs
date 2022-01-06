@@ -3,13 +3,13 @@
 public class Class : Statement
 {
     public Token Name { get; }
-    public Expressions.Variable? Base { get; }
+    public Expressions.Variable? BaseClass { get; }
     public Function[] Methods { get; }
 
-    public Class(Token name, Expressions.Variable? @base, IEnumerable<Function> methods)
+    public Class(Token name, Expressions.Variable? baseClass, IEnumerable<Function> methods)
     {
         Name = name;
-        Base = @base;
+        BaseClass = baseClass;
         Methods = methods as Function[] ?? methods.ToArray();
     }
 
