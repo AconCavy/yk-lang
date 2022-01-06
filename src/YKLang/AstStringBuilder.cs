@@ -1,6 +1,8 @@
 ﻿using System.Text;
 using YKLang.Expressions;
 using YKLang.Statements;
+using Expression = YKLang.Expressions.Expression;
+using Variable = YKLang.Statements.Variable;
 
 namespace YKLang;
 
@@ -13,7 +15,7 @@ public class AstStringBuilder : Statements.IVisitor<string>, Expressions.IVisito
         Source = source;
     }
 
-    public string ToString(Expressions.Expression expression)
+    public string ToString(Expression expression)
     {
         return expression.Accept(this);
     }
@@ -88,7 +90,7 @@ public class AstStringBuilder : Statements.IVisitor<string>, Expressions.IVisito
         return statement.Value is null ? "(return)" : Parenthesize("return", statement.Value);
     }
 
-    public string Visit(Statements.Variable statement)
+    public string Visit(Variable statement)
     {
         return statement.Initializer is null
             ? Parenthesize("var", statement.Name)
@@ -169,10 +171,10 @@ public class AstStringBuilder : Statements.IVisitor<string>, Expressions.IVisito
     {
         return value switch
         {
-            Expressions.Expression expr => expr.Accept(this),
+            Expression expr => expr.Accept(this),
             Statement stmt => stmt.Accept(this),
             Token token => GetTokenString(token),
-            IEnumerable<dynamic> values => TransformToString(values),
+            IEnumerable<dynamic> values => string.Join(" ", values.Select(x => TransformToString(x))),
             _ => value.ToString()
         };
     }
