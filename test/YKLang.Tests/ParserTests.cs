@@ -75,8 +75,23 @@ public class ParserTests
 
     [Theory]
     [InlineData("return 1;", new[] { "(return 1)" })]
-    [InlineData("var x = 1; return x;", new[] { "(var x = 1)", "(return x)" })]
+    [InlineData("return x;", new[] { "(return x)" })]
+    [InlineData("return", new string[] { })]
     public void ReturnStatementAstTest(string source, string[] expected)
+    {
+        AssertAst(source, expected);
+    }
+
+    [Theory]
+    [InlineData("while(true) {}", new[] { "(while True (block ))" })]
+    [InlineData("while(x < 10) {}", new[] { "(while (< x 10) (block ))" })]
+    [InlineData("while(x < 10) { x = x + 1; }", new[] { "(while (< x 10) (block (; (= x (+ x 1)))))" })]
+    [InlineData("while", new string[] { })]
+    [InlineData("while(", new string[] { })]
+    [InlineData("while()", new string[] { })]
+    [InlineData("while(true) {", new string[] { })]
+    [InlineData("while(true) }", new string[] { })]
+    public void WhileStatementAstTest(string source, string[] expected)
     {
         AssertAst(source, expected);
     }
