@@ -15,6 +15,18 @@ public class ParserTests
     }
 
     [Theory]
+    [InlineData("function F() { }", new[] { "(function F())" })]
+    [InlineData("function F() { var x = 1; }", new[] { "(function F() (var x = 1))" })]
+    [InlineData("function F(a) { }", new[] { "(function F(a))" })]
+    [InlineData("function F(a) { var x = 1; }", new[] { "(function F(a) (var x = 1))" })]
+    [InlineData("function F(a, b) { }", new[] { "(function F(a b))" })]
+    [InlineData("function F(a, b) { var x = 1; }", new[] { "(function F(a b) (var x = 1))" })]
+    public void FunctionDeclarationAstTest(string source, string[] expected)
+    {
+        AssertAst(source, expected);
+    }
+
+    [Theory]
     [InlineData("var x = 1;", new[] { "(var x = 1)" })]
     [InlineData("var x = \"Foo\";", new[] { "(var x = Foo)" })]
     [InlineData("var", new string[] { })]
