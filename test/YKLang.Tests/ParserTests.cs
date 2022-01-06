@@ -48,6 +48,23 @@ public class ParserTests
     }
 
     [Theory]
+    [InlineData("x = 1;", new[] { "(; (= x 1))" })]
+    [InlineData("x = \"Foo\";", new[] { "(; (= x Foo))" })]
+    [InlineData("x = true;", new[] { "(; (= x True))" })]
+    [InlineData("x = false;", new[] { "(; (= x False))" })]
+    [InlineData("x = true || false;", new[] { "(; (= x (|| True False)))" })]
+    [InlineData("x = true && false;", new[] { "(; (= x (&& True False)))" })]
+    [InlineData("x = nil;", new[] { "(; (= x nil))" })]
+    [InlineData("x = (1 + 1);", new[] { "(; (= x (group (+ 1 1))))" })]
+    [InlineData("x = F(1);", new[] { "(; (= x (call F 1)))" })]
+    [InlineData("x.y = 1;", new[] { "(; (= x y 1))" })]
+    [InlineData("1 = 1;", new string[] { })]
+    public void AssignmentAstTest(string source, string[] expected)
+    {
+        AssertAst(source, expected);
+    }
+
+    [Theory]
     [InlineData("for(;;) {}", new[] { "(while True (block ))" })]
     [InlineData("for(var i = 0;;) {}", new[] { "(block (var i = 0)(while True (block )))" })]
     [InlineData("for(i = 0;;) {}", new[] { "(block (; (= i 0))(while True (block )))" })]
