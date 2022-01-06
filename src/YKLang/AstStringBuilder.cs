@@ -4,7 +4,7 @@ using YKLang.Statements;
 
 namespace YKLang;
 
-public class AstStringBuilder : IAstBuilder<string>
+public class AstStringBuilder : Statements.IVisitor<string>, Expressions.IVisitor<string>
 {
     public string Source { get; }
 
