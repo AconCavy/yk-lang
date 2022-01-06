@@ -195,7 +195,12 @@ public static class Parser
             _ = Expect(TokenType.RightParen, "Expect ')' after 'if' condition.");
 
             var thenBranch = Statement();
-            var elseBranch = IsMatch(TokenType.Else) ? Statement() : null;
+            Statement? elseBranch = null;
+            if (IsMatch(TokenType.Else))
+            {
+                _ = Advance();
+                elseBranch = IsMatch(TokenType.If) ? IfStatement() : Statement();
+            }
 
             return new If(condition, thenBranch, elseBranch);
         }
