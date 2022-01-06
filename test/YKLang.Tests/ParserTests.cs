@@ -58,6 +58,22 @@ public class ParserTests
     }
 
     [Theory]
+    [InlineData("if(true) {}", new[] { "(if True (block ))" })]
+    [InlineData("if(x < 10) {}", new[] { "(if (< x 10) (block ))" })]
+    [InlineData("if(x < 10) { x = 0; }", new[] { "(if (< x 10) (block (; (= x 0))))" })]
+    [InlineData("if(x < 10) {} else {}", new[] { "(if-else (< x 10) (block ) (block ))" })]
+    [InlineData("if(x < 10) {} else if (y < 10) {}", new[] { "(if-else (< x 10) (block ) (if (< y 10) (block )))" })]
+    [InlineData("if", new string[] { })]
+    [InlineData("if(", new string[] { })]
+    [InlineData("if()", new string[] { })]
+    [InlineData("if(true) {", new string[] { })]
+    [InlineData("if(true) }", new string[] { })]
+    public void IfStatementAstTest(string source, string[] expected)
+    {
+        AssertAst(source, expected);
+    }
+
+    [Theory]
     [InlineData("return 1;", new[] { "(return 1)" })]
     [InlineData("var x = 1; return x;", new[] { "(var x = 1)", "(return x)" })]
     public void ReturnStatementAstTest(string source, string[] expected)
