@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
@@ -151,6 +150,27 @@ public class LexerTests
             new(TokenType.Identifier, "x"),
             new(TokenType.Assign, "="),
             new(TokenType.Number, "1.0"),
+        };
+
+        var actual = Lexer.Analyze(Source);
+        AssertTokens(Source, expected, actual);
+    }
+
+    [Fact]
+    public void DefineFunctionTest()
+    {
+        const string Source = "function F(x, y) {}";
+        var expected = new ValuedToken[]
+        {
+            new(TokenType.Function, "function"),
+            new(TokenType.Identifier, "F"),
+            new(TokenType.LeftParen, "("),
+            new(TokenType.Identifier, "x"),
+            new(TokenType.Comma, ","),
+            new(TokenType.Identifier, "y"),
+            new(TokenType.RightParen, ")"),
+            new(TokenType.LeftBrace, "{"),
+            new(TokenType.RightBrace, "}")
         };
 
         var actual = Lexer.Analyze(Source);
