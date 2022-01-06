@@ -143,6 +143,26 @@ public class ParserTests
         AssertAst(source, expected);
     }
 
+    [Fact]
+    public void SeekAstTest()
+    {
+        const string Source = @"
+function F()
+{
+    var x = 1
+    var y = 1;
+    var z =;
+    ;
+    ;
+    x;
+    return y;
+}
+";
+        const string Expected = "(function F() (var y = 1) (return y))";
+
+        AssertAst(Source, new[] { Expected });
+    }
+
     private static void AssertAst(string source, string[] expected)
     {
         var tokens = Lexer.Analyze(source);
