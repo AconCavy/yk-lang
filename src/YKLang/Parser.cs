@@ -10,15 +10,15 @@ public static class Parser
     public static IEnumerable<Statement> Parse(string source, IEnumerable<Token> tokens)
     {
         var queue = new Queue<Token>(tokens);
-        var statements = new List<Statement>();
+        var result = new List<Statement>();
         while (!IsMatch(TokenType.Eof))
         {
             var declaration = Declaration();
             if (declaration is { })
-                statements.Add(declaration);
+                result.Add(declaration);
         }
 
-        return statements;
+        return result;
 
         Token Advance() => queue.Count > 0 ? queue.Dequeue() : Token.Eof;
         Token Peek() => queue.Count > 0 ? queue.Peek() : Token.Eof;
@@ -102,19 +102,19 @@ public static class Parser
             var name = Expect(TokenType.Identifier, $"Expect {kind} name.");
             _ = Expect(TokenType.LeftParen, $"Expect '(' after {kind} name.");
 
-            var arguments = new List<Token>();
+            var parameters = new List<Token>();
             while (IsMatch(TokenType.Identifier))
             {
-                var argument = Expect(TokenType.Identifier, "Expect argument name.");
-                arguments.Add(argument);
+                var parameter = Expect(TokenType.Identifier, "Expect parameter name.");
+                parameters.Add(parameter);
                 if (IsMatch(TokenType.Comma))
                     Advance();
             }
 
-            _ = Expect(TokenType.RightParen, "Expect ')' after arguments.");
+            _ = Expect(TokenType.RightParen, "Expect ')' after parameters.");
             var body = Block();
 
-            return new Function(name, arguments, body);
+            return new Function(name, parameters, body);
         }
 
         Statements.Variable VarDeclaration()
@@ -232,17 +232,17 @@ public static class Parser
         {
             _ = Expect(TokenType.LeftBrace, "Expect '{' before block");
 
-            var stmts = new List<Statement>();
+            var statements = new List<Statement>();
             while (!AnyMatch(TokenType.RightBrace, TokenType.Eof))
             {
                 var declaration = Declaration();
                 if (declaration is { })
-                    stmts.Add(declaration);
+                    statements.Add(declaration);
             }
 
             _ = Expect(TokenType.RightBrace, "Expect '}' after block.");
 
-            return stmts;
+            return statements;
         }
 
         Expression Expression()
@@ -260,8 +260,8 @@ public static class Parser
             var value = Assignment();
             return expression switch
             {
-                Variable ev => new Assign(ev.Name, value),
-                Get eg => new Set(eg.Object, eg.Name, value),
+                Variable expr => new Assign(expr.Name, value),
+                Get expr => new Set(expr.Object, expr.Name, value),
                 _ => throw new ParseException("Invalid assignment target.")
             };
         }
@@ -351,6 +351,7 @@ public static class Parser
 
             var op = Advance();
             var right = Unary();
+
             return new Unary(op, right);
         }
 
@@ -362,17 +363,17 @@ public static class Parser
                 if (IsMatch(TokenType.LeftParen))
                 {
                     _ = Advance();
-                    var args = new List<Expression>();
+                    var arguments = new List<Expression>();
                     if (!IsMatch(TokenType.RightParen))
                     {
                         do
                         {
-                            args.Add(Expression());
+                            arguments.Add(Expression());
                         } while (IsMatch(TokenType.Comma));
                     }
 
                     var paren = Expect(TokenType.RightParen, "Expect ')' after arguments.");
-                    return new Call(expression, paren, args);
+                    return new Call(expression, paren, arguments);
                 }
 
                 if (IsMatch(TokenType.Dot))
