@@ -62,12 +62,16 @@ public class AstStringBuilder : IAstBuilder<string>
     public string Visit(Function statement)
     {
         var builder = new StringBuilder();
-        builder.Append($"(function {GetTokenString(statement.Name)} + \"(\"");
+        builder.Append($"(function {GetTokenString(statement.Name)}(");
         if (statement.Params.Length > 0)
             builder.Append(string.Join(" ", statement.Params.Select(GetTokenString)));
-        builder.Append(") ");
+        builder.Append(')');
         if (statement.Body.Length > 0)
+        {
+            builder.Append(' ');
             builder.Append(string.Join(" ", statement.Body.Select(x => x.Accept(this))));
+        }
+
         builder.Append(')');
         return builder.ToString();
     }
