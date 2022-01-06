@@ -8,7 +8,17 @@ public class ParserTests
     [Theory]
     [InlineData("class Foo {}", new[] { "(class Foo)" })]
     [InlineData("class Foo : Bar {}", new[] { "(class Foo : Bar)" })]
+    [InlineData("class Foo { function F() {} }", new[] { "(class Foo (function F()))" })]
+    [InlineData("class Foo { function F(a) {} }", new[] { "(class Foo (function F(a)))" })]
+    [InlineData("class Foo { function F(a, b) {} }", new[] { "(class Foo (function F(a b)))" })]
+    [InlineData("class Foo { function F(a) { return a; } }", new[] { "(class Foo (function F(a) (return a)))" })]
+    [InlineData("class Foo { function F() { return this.a; } }",
+        new[] { "(class Foo (function F() (return (. this a))))" })]
+    [InlineData("class Foo : Bar { function F() { return base.a; } }",
+        new[] { "(class Foo : Bar (function F() (return (base a))))" })]
     [InlineData("class Foo", new string[] { })]
+    [InlineData("class Foo {", new string[] { })]
+    [InlineData("class Foo }", new string[] { })]
     public void ClassDeclarationAstTest(string source, string[] expected)
     {
         AssertAst(source, expected);
