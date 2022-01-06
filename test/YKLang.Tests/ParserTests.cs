@@ -40,13 +40,17 @@ public class ParserTests
     [Theory]
     [InlineData("for(;;) {}", new[] { "(while True (block ))" })]
     [InlineData("for(var i = 0;;) {}", new[] { "(block (var i = 0)(while True (block )))" })]
+    [InlineData("for(i = 0;;) {}", new[] { "(block (; (= i 0))(while True (block )))" })]
     [InlineData("for(; 1 < 10;) {}", new[] { "(while (< 1 10) (block ))" })]
     [InlineData("for(var i = 0; i < 10;) {}", new[] { "(block (var i = 0)(while (< i 10) (block )))" })]
     [InlineData("for(;; i = i + 1) {}", new[] { "(while True (block (block )(; (= i (+ i 1)))))" })]
-    [InlineData("for(var i = 0;; i = i + 1) {}", new[] { "(block (var i = 0)(while True (block (block )(; (= i (+ i 1))))))" })]
+    [InlineData("for(var i = 0;; i = i + 1) {}",
+        new[] { "(block (var i = 0)(while True (block (block )(; (= i (+ i 1))))))" })]
     [InlineData("for(; 1 < 10; i = i + 1) {}", new[] { "(while (< 1 10) (block (block )(; (= i (+ i 1)))))" })]
-    [InlineData("for(var i = 0; i < 10; i = i + 1) {}", new[] { "(block (var i = 0)(while (< i 10) (block (block )(; (= i (+ i 1))))))" })]
-    [InlineData("for(var i = 0; i < 10; i = i + 1) { var x = i; }", new[] { "(block (var i = 0)(while (< i 10) (block (block (var x = i))(; (= i (+ i 1))))))" })]
+    [InlineData("for(var i = 0; i < 10; i = i + 1) {}",
+        new[] { "(block (var i = 0)(while (< i 10) (block (block )(; (= i (+ i 1))))))" })]
+    [InlineData("for(var i = 0; i < 10; i = i + 1) { var x = i; }",
+        new[] { "(block (var i = 0)(while (< i 10) (block (block (var x = i))(; (= i (+ i 1))))))" })]
     [InlineData("for", new string[] { })]
     [InlineData("for(;)", new string[] { })]
     [InlineData("for(;;)", new string[] { })]
