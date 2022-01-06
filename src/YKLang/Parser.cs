@@ -103,13 +103,12 @@ public static class Parser
             _ = Expect(TokenType.LeftParen, $"Expect '(' after {kind} name.");
 
             var arguments = new List<Token>();
-            if (!IsMatch(TokenType.RightParen))
+            while (IsMatch(TokenType.Identifier))
             {
-                do
-                {
-                    var argument = Expect(TokenType.Identifier, "Expect argument name.");
-                    arguments.Add(argument);
-                } while (IsMatch(TokenType.Comma));
+                var argument = Expect(TokenType.Identifier, "Expect argument name.");
+                arguments.Add(argument);
+                if (IsMatch(TokenType.Comma))
+                    Advance();
             }
 
             _ = Expect(TokenType.RightParen, "Expect ')' after arguments.");
