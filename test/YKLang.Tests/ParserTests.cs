@@ -16,7 +16,10 @@ public class ParserTests
 
     [Theory]
     [InlineData("var x = 1;", new[] { "(var x = 1)" })]
-    [InlineData("var x = 1", new string[] { })]
+    [InlineData("var x = \"Foo\";", new[] { "(var x = Foo)" })]
+    [InlineData("var", new string[] { })]
+    [InlineData("var x", new string[] { })]
+    [InlineData("var x =", new string[] { })]
     public void VarDeclarationAstTest(string source, string[] expected)
     {
         AssertAst(source, expected);
