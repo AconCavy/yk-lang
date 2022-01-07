@@ -165,8 +165,8 @@ function F()
 
     private static void AssertAst(string source, string[] expected)
     {
-        var tokens = Lexer.Analyze(source);
-        var statements = Parser.Parse(source, tokens).ToArray();
+        var parsableObject = new ParsableObject(source);
+        var statements = Parser.Parse(parsableObject).ToArray();
         Assert.Equal(expected.Length, statements.Length);
         var astBuilder = new AstStringBuilder(source);
         for (var i = 0; i < expected.Length; i++)

@@ -8,18 +8,15 @@ namespace YKLang;
 
 public static class Parser
 {
-    public static IEnumerable<Statement> Parse(string source, IEnumerable<Token> tokens)
+    public static IEnumerable<Statement> Parse(ParsableObject parsableObject)
     {
-        var queue = new Queue<Token>(tokens);
-        var result = new List<Statement>();
+        var queue = new Queue<Token>(parsableObject.Tokens);
         while (!IsMatch(TokenType.Eof))
         {
             var declaration = Declaration();
             if (declaration is { })
-                result.Add(declaration);
+                yield return declaration;
         }
-
-        return result;
 
         Token Advance() => queue.Count > 0 ? queue.Dequeue() : Token.Eof;
         Token Peek() => queue.Count > 0 ? queue.Peek() : Token.Eof;
@@ -400,8 +397,8 @@ public static class Parser
             var token = Advance();
             return token.Type switch
             {
-                TokenType.Number => new Literal(double.Parse(source[token.Range])),
-                TokenType.String => new Literal(source[token.Range]),
+                TokenType.Number => new Literal(double.Parse(parsableObject.Source[token.Range])),
+                TokenType.String => new Literal(parsableObject.Source[token.Range]),
                 TokenType.True => new Literal(true),
                 TokenType.False => new Literal(false),
                 TokenType.Nil => new Literal(null),
