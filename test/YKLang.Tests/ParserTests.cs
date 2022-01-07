@@ -166,13 +166,9 @@ function F()
     private static void AssertAst(string source, string[] expected)
     {
         var parsableObject = new ParsableObject(source);
-        var statements = Parser.Parse(parsableObject).ToArray();
-        Assert.Equal(expected.Length, statements.Length);
-        var astBuilder = new AstStringBuilder(source);
-        for (var i = 0; i < expected.Length; i++)
-        {
-            var actual = astBuilder.ToString(statements[i]);
-            Assert.Equal(expected[i], actual);
-        }
+        var interpretableObject = Parser.Parse(parsableObject);
+        var astBuilder = new AstStringBuilder(interpretableObject);
+        var actual = astBuilder.Interpret();
+        Assert.Equal(expected, actual);
     }
 }
