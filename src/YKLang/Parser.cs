@@ -1,4 +1,5 @@
-﻿using YKLang.Expressions;
+﻿using YKLang.Exceptions;
+using YKLang.Expressions;
 using YKLang.Statements;
 using Expression = YKLang.Expressions.Expression;
 using Variable = YKLang.Expressions.Variable;
