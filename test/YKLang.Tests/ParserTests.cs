@@ -167,8 +167,7 @@ function F()
     {
         var parsableObject = Lexer.Analyze(source);
         var interpretableObject = Parser.Parse(parsableObject);
-        var astBuilder = new AstStringBuilder(interpretableObject);
-        var actual = astBuilder.Interpret();
+        var actual = new AstStringBuilder(interpretableObject).Interpret();
         Assert.Equal(expected, actual);
     }
 }
