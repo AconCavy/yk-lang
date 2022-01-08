@@ -9,10 +9,10 @@ public static class Lexer
         '(', ')', '{', '}', ',', '.', ':', ';', '+', '-', '*', '/', '!', '=', '<', '>', '&', '|', ' ', '\t', '\r', '\n'
     };
 
-    public static IReadOnlyList<Token> Analyze(ReadOnlySpan<char> source)
+    public static ParsableObject Analyze(ReadOnlySpan<char> source)
     {
         var current = 0;
-        var tokens = new List<Token>();
+        var result = new List<Token>();
 
         while (current < source.Length)
         {
@@ -35,11 +35,11 @@ public static class Lexer
                 type = SelectKeywordType(source.Slice(current, length));
             }
 
-            tokens.Add(new Token(type, range));
+            result.Add(new Token(type, range));
             current += length;
         }
 
-        return tokens;
+        return new ParsableObject(source.ToString(), result);
     }
 
     private static (TokenType TokenType, int Length) GetTypeAndLength(ReadOnlySpan<char> source)

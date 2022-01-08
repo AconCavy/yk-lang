@@ -27,7 +27,7 @@ public class LexerTests
         };
 
         var actual = Lexer.Analyze(Source);
-        AssertTokens(Source, expected, actual);
+        AssertTokens(expected, actual);
     }
 
     [Fact]
@@ -43,7 +43,7 @@ public class LexerTests
         };
 
         var actual = Lexer.Analyze(Source);
-        AssertTokens(Source, expected, actual);
+        AssertTokens(expected, actual);
     }
 
     [Fact]
@@ -67,7 +67,7 @@ public class LexerTests
         };
 
         var actual = Lexer.Analyze(Source);
-        AssertTokens(Source, expected, actual);
+        AssertTokens(expected, actual);
     }
 
     [Fact]
@@ -82,7 +82,7 @@ public class LexerTests
         };
 
         var actual = Lexer.Analyze(Source);
-        AssertTokens(Source, expected, actual);
+        AssertTokens(expected, actual);
     }
 
     [Fact]
@@ -98,7 +98,7 @@ public class LexerTests
         };
 
         var actual = Lexer.Analyze(Source);
-        AssertTokens(Source, expected, actual);
+        AssertTokens(expected, actual);
     }
 
     [Fact]
@@ -112,7 +112,7 @@ public class LexerTests
         };
 
         var actual = Lexer.Analyze(Source);
-        AssertTokens(Source, expected, actual);
+        AssertTokens(expected, actual);
 
     }
 
@@ -137,7 +137,7 @@ public class LexerTests
         };
 
         var actual = Lexer.Analyze(Source);
-        AssertTokens(Source, expected, actual);
+        AssertTokens(expected, actual);
     }
 
     [Fact]
@@ -153,7 +153,7 @@ public class LexerTests
         };
 
         var actual = Lexer.Analyze(Source);
-        AssertTokens(Source, expected, actual);
+        AssertTokens(expected, actual);
     }
 
     [Fact]
@@ -174,7 +174,7 @@ public class LexerTests
         };
 
         var actual = Lexer.Analyze(Source);
-        AssertTokens(Source, expected, actual);
+        AssertTokens(expected, actual);
     }
 
     [Theory]
@@ -245,12 +245,13 @@ public class LexerTests
         {
             new(TokenType.LeftParen, 0..1), new(TokenType.Identifier, 2..5), new(TokenType.RightParen, 6..7)
         };
-        AssertTokens(Source, expected, actual);
+
+        AssertTokens(expected, new ParsableObject(Source, actual));
     }
 
-    private static void AssertTokens(string source, IEnumerable<ValuedToken> expected, IEnumerable<Token> actual)
+    private static void AssertTokens(IEnumerable<ValuedToken> expected, ParsableObject actual)
     {
-        Assert.Equal(expected, actual.Select(x => new ValuedToken(x.Type, source[x.Range])));
+        Assert.Equal(expected, actual.Tokens.Select(x => new ValuedToken(x.Type, actual.Source[x.Range])));
     }
 
     private record ValuedToken(TokenType Type, string Value);

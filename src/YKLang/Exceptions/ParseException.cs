@@ -1,9 +1,9 @@
-﻿namespace YKLang;
+﻿namespace YKLang.Exceptions;
 
 [Serializable]
 public class ParseException : Exception
 {
-    public ParseException() : base() { }
+    public ParseException() { }
     public ParseException(string message) : base(message) { }
     public ParseException(string message, Exception inner) : base(message, inner) { }
 

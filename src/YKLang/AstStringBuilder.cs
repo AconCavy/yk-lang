@@ -8,19 +8,24 @@ namespace YKLang;
 
 public class AstStringBuilder : Statements.IVisitor<string>, Expressions.IVisitor<string>
 {
-    public string Source { get; }
+    private readonly InterpretableObject _interpretableObject;
 
-    public AstStringBuilder(string source)
+    public AstStringBuilder(InterpretableObject interpretableObject)
     {
-        Source = source;
+        _interpretableObject = interpretableObject;
     }
 
-    public string ToString(Expression expression)
+    public IEnumerable<string> Interpret()
+    {
+        return _interpretableObject.Statements.Select(BuildString);
+    }
+
+    private string BuildString(Expression expression)
     {
         return expression.Accept(this);
     }
 
-    public string ToString(Statement statement)
+    private string BuildString(Statement statement)
     {
         return statement.Accept(this);
     }
@@ -44,12 +49,12 @@ public class AstStringBuilder : Statements.IVisitor<string>, Expressions.IVisito
         builder.Append($"(class {GetTokenString(statement.Name)}");
         if (statement.BaseClass is { })
         {
-            builder.Append($" : {ToString(statement.BaseClass)}");
+            builder.Append($" : {BuildString(statement.BaseClass)}");
         }
 
         foreach (var function in statement.Methods)
         {
-            builder.Append($" {ToString(function)}");
+            builder.Append($" {BuildString(function)}");
         }
 
         builder.Append(')');
@@ -181,6 +186,6 @@ public class AstStringBuilder : Statements.IVisitor<string>, Expressions.IVisito
 
     private string GetTokenString(Token token)
     {
-        return Source[token.Range];
+        return _interpretableObject.Source[token.Range];
     }
 }

@@ -1,4 +1,5 @@
-﻿using YKLang.Expressions;
+﻿using YKLang.Exceptions;
+using YKLang.Expressions;
 using YKLang.Statements;
 using Expression = YKLang.Expressions.Expression;
 using Variable = YKLang.Expressions.Variable;
@@ -7,9 +8,11 @@ namespace YKLang;
 
 public static class Parser
 {
-    public static IEnumerable<Statement> Parse(string source, IEnumerable<Token> tokens)
+    public static InterpretableObject Parse(ParsableObject parsableObject)
     {
-        var queue = new Queue<Token>(tokens);
+        var (source, tokens) = parsableObject;
+        var current = 0;
+
         var result = new List<Statement>();
         while (!IsMatch(TokenType.Eof))
         {
@@ -18,10 +21,10 @@ public static class Parser
                 result.Add(declaration);
         }
 
-        return result;
+        return new InterpretableObject(source, result);
 
-        Token Advance() => queue.Count > 0 ? queue.Dequeue() : Token.Eof;
-        Token Peek() => queue.Count > 0 ? queue.Peek() : Token.Eof;
+        Token Advance() => current < tokens.Count ? tokens[current++] : Token.Eof;
+        Token Peek() => current < tokens.Count ? tokens[current] : Token.Eof;
         bool IsMatch(TokenType type) => type == Peek().Type;
         bool AnyMatch(params TokenType[] types) => types.Contains(Peek().Type);
 
