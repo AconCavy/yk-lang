@@ -9,7 +9,7 @@ public static class Lexer
         '(', ')', '{', '}', ',', '.', ':', ';', '+', '-', '*', '/', '!', '=', '<', '>', '&', '|', ' ', '\t', '\r', '\n'
     };
 
-    public static IReadOnlyList<Token> Analyze(ReadOnlySpan<char> source)
+    public static ParsableObject Analyze(ReadOnlySpan<char> source)
     {
         var current = 0;
         var tokens = new List<Token>();
@@ -39,7 +39,7 @@ public static class Lexer
             current += length;
         }
 
-        return tokens;
+        return new ParsableObject(source.ToString(), tokens);
     }
 
     private static (TokenType TokenType, int Length) GetTypeAndLength(ReadOnlySpan<char> source)

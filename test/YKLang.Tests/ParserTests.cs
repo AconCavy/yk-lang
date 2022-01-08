@@ -165,7 +165,7 @@ function F()
 
     private static void AssertAst(string source, string[] expected)
     {
-        var parsableObject = new ParsableObject(source);
+        var parsableObject = Lexer.Analyze(source);
         var interpretableObject = Parser.Parse(parsableObject);
         var astBuilder = new AstStringBuilder(interpretableObject);
         var actual = astBuilder.Interpret();
