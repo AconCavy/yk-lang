@@ -10,7 +10,9 @@ public static class Parser
 {
     public static InterpretableObject Parse(ParsableObject parsableObject)
     {
-        var queue = new Queue<Token>(parsableObject.Tokens);
+        var (source, tokens) = parsableObject;
+        var current = 0;
+
         var result = new List<Statement>();
         while (!IsMatch(TokenType.Eof))
         {
@@ -19,10 +21,10 @@ public static class Parser
                 result.Add(declaration);
         }
 
-        return new InterpretableObject(parsableObject.Source, result);
+        return new InterpretableObject(source, result);
 
-        Token Advance() => queue.Count > 0 ? queue.Dequeue() : Token.Eof;
-        Token Peek() => queue.Count > 0 ? queue.Peek() : Token.Eof;
+        Token Advance() => current < tokens.Count ? tokens[current++] : Token.Eof;
+        Token Peek() => current < tokens.Count ? tokens[current] : Token.Eof;
         bool IsMatch(TokenType type) => type == Peek().Type;
         bool AnyMatch(params TokenType[] types) => types.Contains(Peek().Type);
 
@@ -400,8 +402,8 @@ public static class Parser
             var token = Advance();
             return token.Type switch
             {
-                TokenType.Number => new Literal(double.Parse(parsableObject.Source[token.Range])),
-                TokenType.String => new Literal(parsableObject.Source[token.Range]),
+                TokenType.Number => new Literal(double.Parse(source[token.Range])),
+                TokenType.String => new Literal(source[token.Range]),
                 TokenType.True => new Literal(true),
                 TokenType.False => new Literal(false),
                 TokenType.Nil => new Literal(null),
