@@ -5,11 +5,11 @@ namespace YKLang;
 public class InterpretableObject
 {
     public string Source { get; }
-    public Statement[] Statements { get; }
+    public IReadOnlyList<Statement> Statements { get; }
 
-    public InterpretableObject(string source, IEnumerable<Statement> statements)
+    public InterpretableObject(string source, IReadOnlyList<Statement> statements)
     {
         Source = source;
-        Statements = statements as Statement[] ?? statements.ToArray();
+        Statements = statements;
     }
 }
