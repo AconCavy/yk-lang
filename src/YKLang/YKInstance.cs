@@ -5,7 +5,7 @@ namespace YKLang;
 public class YKInstance
 {
     private readonly YKClass _ykClass;
-    private readonly IDictionary<string, dynamic> _fields;
+    private readonly Dictionary<string, dynamic> _fields;
 
     public YKInstance(YKClass ykClass)
     {
