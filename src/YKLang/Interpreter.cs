@@ -6,7 +6,7 @@ using Variable = YKLang.Statements.Variable;
 
 namespace YKLang;
 
-public class Interpreter : Statements.IVisitor<bool>, Expressions.IVisitor<object?>
+public class Interpreter : Statements.IVisitor<object?>, Expressions.IVisitor<object?>
 {
     public string Source => _interpretableObject.Source;
     private Environment Globals { get; }
@@ -82,13 +82,13 @@ public class Interpreter : Statements.IVisitor<bool>, Expressions.IVisitor<objec
         return value as bool? ?? true;
     }
 
-    public bool Visit(Block statement)
+    public object? Visit(Block statement)
     {
         ExecuteBlock(statement.Statements, new Environment(Environment!));
         return true;
     }
 
-    public bool Visit(Class statement)
+    public object? Visit(Class statement)
     {
         YKClass? baseClass = null;
         if (statement.BaseClass is { })
@@ -133,13 +133,13 @@ public class Interpreter : Statements.IVisitor<bool>, Expressions.IVisitor<objec
         return true;
     }
 
-    public bool Visit(Statements.Expression statement)
+    public object? Visit(Statements.Expression statement)
     {
         Evaluate(statement.Body);
         return true;
     }
 
-    public bool Visit(Function statement)
+    public object? Visit(Function statement)
     {
         var name = GetTokenName(statement.Name).ToString();
         var function = new YKFunction(name, statement, Environment!, false);
@@ -147,7 +147,7 @@ public class Interpreter : Statements.IVisitor<bool>, Expressions.IVisitor<objec
         return true;
     }
 
-    public bool Visit(If statement)
+    public object? Visit(If statement)
     {
         if (IsTruthy(Evaluate(statement.Condition)))
         {
@@ -161,13 +161,13 @@ public class Interpreter : Statements.IVisitor<bool>, Expressions.IVisitor<objec
         return true;
     }
 
-    public bool Visit(Return statement)
+    public object? Visit(Return statement)
     {
-        // var value = statement.Value is {} ? Evaluate(statement.Value) : null;
-        return true;
+        var value = statement.Value is { } ? Evaluate(statement.Value) : null;
+        return value;
     }
 
-    public bool Visit(Variable statement)
+    public object? Visit(Variable statement)
     {
         var value = statement.Initializer is { } ? Evaluate(statement.Initializer) : null;
         var name = GetTokenName(statement.Name).ToString();
@@ -175,7 +175,7 @@ public class Interpreter : Statements.IVisitor<bool>, Expressions.IVisitor<objec
         return true;
     }
 
-    public bool Visit(While statement)
+    public object? Visit(While statement)
     {
         while (IsTruthy(Evaluate(statement.Condition)))
         {
