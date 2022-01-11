@@ -29,7 +29,7 @@ public class YKFunction : IYKCallable
         return _declaration.Parameters.Length;
     }
 
-    public dynamic? Call(Interpreter interpreter, IEnumerable<dynamic> arguments)
+    public dynamic? Call(Interpreter interpreter, dynamic?[] arguments)
     {
         var env = new Environment(_environment);
         foreach (var (parameter, argument) in _declaration.Parameters.Zip(arguments))

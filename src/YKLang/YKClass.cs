@@ -23,7 +23,7 @@ public class YKClass : IYKCallable
         return FindMethod("init")?.Arity() ?? 0;
     }
 
-    public dynamic? Call(Interpreter interpreter, IEnumerable<dynamic> arguments)
+    public dynamic? Call(Interpreter interpreter, dynamic?[] arguments)
     {
         var instance = new YKInstance(this);
         var initializer = FindMethod("init");

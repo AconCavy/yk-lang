@@ -3,5 +3,5 @@
 public interface IYKCallable
 {
     int Arity();
-    dynamic? Call(Interpreter interpreter, IEnumerable<dynamic> arguments);
+    dynamic? Call(Interpreter interpreter, dynamic?[] arguments);
 }
