@@ -70,6 +70,11 @@ public class Interpreter : Statements.IVisitor<bool>, Expressions.IVisitor<objec
             : Globals.Get(name);
     }
 
+    private ReadOnlySpan<char> GetTokenName(Token token)
+    {
+        return Source.AsSpan()[token.Range];
+    }
+
     private static bool IsTruthy(dynamic? value)
     {
         if (value is null)
@@ -95,12 +100,12 @@ public class Interpreter : Statements.IVisitor<bool>, Expressions.IVisitor<objec
             }
             else
             {
-                var baseClassName = _interpretableObject.Source.AsSpan()[statement.BaseClass.Name.Range];
+                var baseClassName = GetTokenName(statement.BaseClass.Name);
                 throw new InterpretException($"Base class must be a class: {baseClassName}.");
             }
         }
 
-        var className = _interpretableObject.Source[statement.Name.Range];
+        var className = GetTokenName(statement.Name).ToString();
         Environment!.Define(className, null);
 
         if (statement.BaseClass is { })
@@ -112,7 +117,7 @@ public class Interpreter : Statements.IVisitor<bool>, Expressions.IVisitor<objec
         var ykMethods = new Dictionary<string, YKFunction>();
         foreach (var method in statement.Methods)
         {
-            var methodName = _interpretableObject.Source[method.Name.Range];
+            var methodName = GetTokenName(method.Name).ToString();
             var isInitializer = methodName == "init";
             var function = new YKFunction(methodName, method, Environment, isInitializer);
             ykMethods[methodName] = function;
@@ -136,7 +141,7 @@ public class Interpreter : Statements.IVisitor<bool>, Expressions.IVisitor<objec
 
     public bool Visit(Function statement)
     {
-        var name = _interpretableObject.Source[statement.Name.Range];
+        var name = GetTokenName(statement.Name).ToString();
         var function = new YKFunction(name, statement, Environment!, false);
         Environment!.Define(name, function);
         return true;
@@ -165,7 +170,7 @@ public class Interpreter : Statements.IVisitor<bool>, Expressions.IVisitor<objec
     public bool Visit(Variable statement)
     {
         var value = statement.Initializer is { } ? Evaluate(statement.Initializer) : null;
-        var name = _interpretableObject.Source[statement.Name.Range];
+        var name = GetTokenName(statement.Name).ToString();
         Environment!.Define(name, value);
         return true;
     }
@@ -183,7 +188,7 @@ public class Interpreter : Statements.IVisitor<bool>, Expressions.IVisitor<objec
     public object? Visit(Assign expression)
     {
         var value = Evaluate(expression.Value);
-        var name = _interpretableObject.Source[expression.Name.Range];
+        var name = GetTokenName(expression.Name).ToString();
         if (_locals.TryGetValue(expression, out var distance))
         {
             Environment!.Assign(name, value, distance);
@@ -244,7 +249,7 @@ public class Interpreter : Statements.IVisitor<bool>, Expressions.IVisitor<objec
     public object? Visit(Get expression)
     {
         var value = Evaluate(expression.Object);
-        var name = _interpretableObject.Source[expression.Name.Range];
+        var name = GetTokenName(expression.Name).ToString();
         if (value is YKInstance instance)
         {
             return instance.Get(name);
@@ -274,7 +279,7 @@ public class Interpreter : Statements.IVisitor<bool>, Expressions.IVisitor<objec
     public object? Visit(Set expression)
     {
         var obj = Evaluate(expression.Object);
-        var name = _interpretableObject.Source[expression.Name.Range];
+        var name = GetTokenName(expression.Name).ToString();
         if (obj is not YKInstance instance)
             throw new InterpretException($"Only instances have fields: {name}.");
 
@@ -286,7 +291,7 @@ public class Interpreter : Statements.IVisitor<bool>, Expressions.IVisitor<objec
     public object? Visit(Base expression)
     {
         var distance = _locals[expression];
-        var name = _interpretableObject.Source[expression.Method.Range];
+        var name = GetTokenName(expression.Method).ToString();
         var baseClass = Environment!.Get("base", distance);
         var instance = Environment.Get("this", distance - 1);
         var method = baseClass!.FindMethod(name);
@@ -298,7 +303,7 @@ public class Interpreter : Statements.IVisitor<bool>, Expressions.IVisitor<objec
 
     public object? Visit(This expression)
     {
-        var name = _interpretableObject.Source[expression.Keyword.Range];
+        var name = GetTokenName(expression.Keyword).ToString();
         return GetVariable(name, expression);
     }
 
@@ -323,7 +328,7 @@ public class Interpreter : Statements.IVisitor<bool>, Expressions.IVisitor<objec
 
     public object? Visit(Expressions.Variable expression)
     {
-        var name = _interpretableObject.Source[expression.Name.Range];
+        var name = GetTokenName(expression.Name).ToString();
         return GetVariable(name, expression);
     }
 }
