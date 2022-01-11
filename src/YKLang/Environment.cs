@@ -5,11 +5,11 @@ namespace YKLang;
 public class Environment
 {
     public Environment? Parent { get; }
-    private readonly Dictionary<string, dynamic> _values;
+    private readonly Dictionary<string, dynamic?> _values;
 
     public Environment()
     {
-        _values = new Dictionary<string, dynamic>();
+        _values = new Dictionary<string, dynamic?>();
     }
 
     public Environment(Environment parent) : this()
@@ -17,7 +17,7 @@ public class Environment
         Parent = parent;
     }
 
-    public void Assign(string name, dynamic value)
+    public void Assign(string name, dynamic? value)
     {
         if (_values.ContainsKey(name))
         {
@@ -34,17 +34,17 @@ public class Environment
         throw UndefinedException(name);
     }
 
-    public void Assign(string name, dynamic value, int distance)
+    public void Assign(string name, dynamic? value, int distance)
     {
         GetAncestor(distance).Assign(name, value);
     }
 
-    public void Define(string name, dynamic value)
+    public void Define(string name, dynamic? value)
     {
         _values[name] = value;
     }
 
-    public dynamic Get(string name)
+    public dynamic? Get(string name)
     {
         try
         {
@@ -56,7 +56,7 @@ public class Environment
         }
     }
 
-    public dynamic Get(string name, int distance)
+    public dynamic? Get(string name, int distance)
     {
         return GetAncestor(distance).Get(name);
     }
