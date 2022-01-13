@@ -82,6 +82,33 @@ public class Interpreter : Statements.IVisitor<object?>, Expressions.IVisitor<ob
         return value as bool? ?? true;
     }
 
+    private static void CheckNumberOperand(dynamic operand)
+    {
+        switch (operand)
+        {
+            case sbyte:
+            case byte:
+            case ushort:
+            case short:
+            case uint:
+            case int:
+            case ulong:
+            case long:
+            case float:
+            case double:
+            case decimal:
+                return;
+            default:
+                throw new InterpretException($"Operand must be a number: {operand}.");
+        }
+    }
+
+    private static void CheckNumberOperand(dynamic left, dynamic right)
+    {
+        CheckNumberOperand(left);
+        CheckNumberOperand(right);
+    }
+
     public object? Visit(Block statement)
     {
         ExecuteBlock(statement.Statements, new Environment(Environment!));
@@ -123,7 +150,7 @@ public class Interpreter : Statements.IVisitor<object?>, Expressions.IVisitor<ob
             ykMethods[methodName] = function;
         }
 
-        var ykClass = new YKClass(className, baseClass!, ykMethods);
+        var ykClass = new YKClass(className, baseClass, ykMethods);
         if (baseClass is { })
         {
             Environment = Environment.Parent;
@@ -208,20 +235,38 @@ public class Interpreter : Statements.IVisitor<object?>, Expressions.IVisitor<ob
 
         try
         {
-            return expression.Operator.Type switch
+            switch (expression.Operator.Type)
             {
-                TokenType.Plus => left + right,
-                TokenType.Minus => left - right,
-                TokenType.Multiply => left * right,
-                TokenType.Divide => left / right,
-                TokenType.Less => left > right,
-                TokenType.LessEqual => left >= right,
-                TokenType.Greater => left < right,
-                TokenType.GreaterEqual => left <= right,
-                TokenType.Equal => left == right,
-                TokenType.NotEqual => left != right,
-                _ => null
-            };
+                case TokenType.Plus:
+                    return left + right;
+                case TokenType.Minus:
+                    CheckNumberOperand(left, right);
+                    return left - right;
+                case TokenType.Multiply:
+                    CheckNumberOperand(left, right);
+                    return left * right;
+                case TokenType.Divide:
+                    CheckNumberOperand(left, right);
+                    return left / right;
+                case TokenType.Less:
+                    CheckNumberOperand(left, right);
+                    return left < right;
+                case TokenType.LessEqual:
+                    CheckNumberOperand(left, right);
+                    return left <= right;
+                case TokenType.Greater:
+                    CheckNumberOperand(left, right);
+                    return left > right;
+                case TokenType.GreaterEqual:
+                    CheckNumberOperand(left, right);
+                    return left >= right;
+                case TokenType.Equal:
+                    return left == right;
+                case TokenType.NotEqual:
+                    return left != right;
+                default:
+                    return (dynamic?)null;
+            }
         }
         catch (Exception e)
         {
@@ -313,12 +358,16 @@ public class Interpreter : Statements.IVisitor<object?>, Expressions.IVisitor<ob
 
         try
         {
-            return expression.Operator.Type switch
+            switch (expression.Operator.Type)
             {
-                TokenType.Minus => -right,
-                TokenType.Not => (bool?)right,
-                _ => null
-            };
+                case TokenType.Minus:
+                    CheckNumberOperand(right);
+                    return -right;
+                case TokenType.Not:
+                    return !IsTruthy(right);
+                default:
+                    return (dynamic?)null;
+            }
         }
         catch (Exception e)
         {
