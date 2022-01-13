@@ -6,7 +6,7 @@ public class YKClass : IYKCallable
     public YKClass? Parent { get; }
     public IReadOnlyDictionary<string, YKFunction> Methods { get; }
 
-    public YKClass(string name, YKClass parent, IReadOnlyDictionary<string, YKFunction> methods)
+    public YKClass(string name, YKClass? parent, IReadOnlyDictionary<string, YKFunction> methods)
     {
         Name = name;
         Parent = parent;
