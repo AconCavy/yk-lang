@@ -20,13 +20,13 @@ public class YKClass : IYKCallable
 
     public int Arity()
     {
-        return FindMethod("init")?.Arity() ?? 0;
+        return FindMethod(Name)?.Arity() ?? 0;
     }
 
     public dynamic? Call(Interpreter interpreter, dynamic?[] arguments)
     {
         var instance = new YKInstance(this);
-        var initializer = FindMethod("init");
+        var initializer = FindMethod(Name);
         initializer?.Bind(instance).Call(interpreter, arguments);
 
         return instance;

@@ -145,7 +145,7 @@ public class Interpreter : Statements.IVisitor<object?>, Expressions.IVisitor<ob
         foreach (var method in statement.Methods)
         {
             var methodName = GetTokenName(method.Name).ToString();
-            var isInitializer = methodName == "init";
+            var isInitializer = methodName == className;
             var function = new YKFunction(methodName, method, Environment, isInitializer);
             ykMethods[methodName] = function;
         }
