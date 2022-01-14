@@ -3,56 +3,12 @@ using Xunit;
 using YKLang.Exceptions;
 using YKLang.Expressions;
 using YKLang.Statements;
+using Variable = YKLang.Statements.Variable;
 
 namespace YKLang.Tests;
 
 public class InterpreterTests
 {
-    [Fact]
-    public void VisitBlockStatementTests()
-    {
-    }
-
-    [Fact]
-    public void VisitClassStatementTest()
-    {
-    }
-
-    [Fact]
-    public void VisitExpressionStatementTest()
-    {
-    }
-
-    [Fact]
-    public void VisitFunctionStatementTest()
-    {
-    }
-
-    [Fact]
-    public void VisitIfStatementTest()
-    {
-    }
-
-    [Fact]
-    public void VisitReturnStatementTest()
-    {
-    }
-
-    [Fact]
-    public void VisitVariableStatementTest()
-    {
-    }
-
-    [Fact]
-    public void VisitWhileStatementTest()
-    {
-    }
-
-    [Fact]
-    public void VisitAssignExpressionTest()
-    {
-    }
-
     [Theory]
     [InlineData(1, TokenType.Plus, 1, 2)]
     [InlineData("a", TokenType.Plus, "b", "ab")]
@@ -98,16 +54,6 @@ public class InterpreterTests
     }
 
     [Fact]
-    public void VisitCallExpressionTest()
-    {
-    }
-
-    [Fact]
-    public void VisitGetExpressionTest()
-    {
-    }
-
-    [Fact]
     public void VisitGroupingExpressionTest()
     {
         var sut = new Interpreter(new InterpretableObject("", Array.Empty<Statement>()));
@@ -147,21 +93,6 @@ public class InterpreterTests
         Assert.Equal(expected, actual);
     }
 
-    [Fact]
-    public void VisitSetExpressionTest()
-    {
-    }
-
-    [Fact]
-    public void VisitBaseExpressionTest()
-    {
-    }
-
-    [Fact]
-    public void VisitThisExpressionTest()
-    {
-    }
-
     [Theory]
     [InlineData(TokenType.Minus, 1, -1)]
     [InlineData(TokenType.Minus, -1, 1)]
@@ -193,7 +124,7 @@ public class InterpreterTests
     {
         var sut = new Interpreter(new InterpretableObject(expected.ToString(), Array.Empty<Statement>()));
         var token = new Token(TokenType.Identifier, ..);
-        sut.Visit(new Statements.Variable(token, new Literal(expected)));
+        sut.Visit(new Variable(token, new Literal(expected)));
 
         var target = new Expressions.Variable(token);
         var actual = sut.Visit(target);
