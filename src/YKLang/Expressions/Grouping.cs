@@ -4,7 +4,7 @@ public class Grouping : Expression
 {
     public Expression Expression { get; }
 
-    internal Grouping(Expression expression)
+    public Grouping(Expression expression)
     {
         Expression = expression;
     }
